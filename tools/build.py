@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Draw the profile card.
 
-One SVG holds the whole profile: the terminal, the name, what I build, the
-stack, the work, and the architecture. It is generated twice, once per theme,
-because GitHub picks the asset by `prefers-color-scheme` and an image served
-through its proxy cannot carry a media query of its own.
+One SVG holds the whole profile: the signature line, the name, what I build, the
+stack, the work, the principles, and the architecture. It is generated twice per
+theme, because GitHub picks the asset by `prefers-color-scheme` and an image
+served through its proxy cannot carry a media query of its own.
 
     python3 tools/build.py
 
@@ -37,21 +37,40 @@ THEMES = {
         bg="#050B1A", panel="#081428", panel2="#0A1930", border="#1E3A5F",
         border_soft="#152D4A", text="#F5F7FF", muted="#94A3B8", dim="#64748B",
         accent="#18D7FF", accent2="#008CFF", accent3="#1769FF", accent4="#635BFF",
-        icon="#CBD5E1", tile="#0E1F38", tile_border="#1E3A5F", halo=".30",
+        icon="#CBD5E1", tile="#0E1F38", tile_border="#1E3A5F", halo=".30", hi="#67E8FF",
     ),
     "light": dict(
         bg="#FFFFFF", panel="#F4F8FF", panel2="#EDF4FF", border="#CBDBF2",
         border_soft="#DCE8F8", text="#08101F", muted="#475569", dim="#7C8BA1",
         accent="#0A79C7", accent2="#0B6BD4", accent3="#1B5FD0", accent4="#5B52E8",
-        icon="#334155", tile="#FFFFFF", tile_border="#D3E1F5", halo=".10",
+        icon="#334155", tile="#FFFFFF", tile_border="#D3E1F5", halo=".10", hi="#8FD4FF",
     ),
 }
 
 # ---------------------------------------------------------------- content
 
-QUERY = "what actually makes regulated software trustworthy?"
-CHIPS = ["SCAN", "VERIFY", "EXPLAIN", "REPORT"]
-ANSWER = "The source stays authoritative. I build the layer that makes it usable."
+# The signature line, the one that runs through the profile picture. Drawn three
+# times over itself — a wide blurred bloom, a soft mid stroke, then the hard
+# body — which is what makes it read as lit rather than merely coloured.
+HERO_WAVE = ("M-60 300 C 200 300, 380 266, 620 256 S 900 300, 1080 208 "
+             "S 1240 108, 1345 128")
+HERO_WAVE_HI = ("M-60 292 C 200 292, 380 258, 620 248 S 900 292, 1080 200 "
+                "S 1240 100, 1345 120")
+HERO_WAVE_TR = ("M-60 336 C 220 336, 400 306, 646 296 S 920 338, 1098 250 "
+                "S 1250 152, 1345 172")
+
+PRINCIPLES_WAVE = ("M-40 112 C 140 112, 210 78, 372 90 S 628 128, 808 104 "
+                   "S 1086 68, 1320 84")
+
+# His own words, from the artwork the profile picture is cut from.
+# x, y sampled off PRINCIPLES_WAVE so each node sits ON the line, and spaced so
+# the longest label still clears the card's side padding.
+PRINCIPLES = [
+    (176, 96, "FOUNDER MINDSET"),
+    (520, 105, "BETTER EVERYDAY"),
+    (862, 97, "IDEAS TO IMPACT"),
+    (1072, 78, "PROGRESS OVER PERFECTION"),
+]
 
 NAME = "ABDULLAH AL TAMIMI"
 ROLE = "Technical Founder · Product Engineer"
@@ -197,6 +216,25 @@ def tile(t, cx, y, slug, label):
     return "".join(o)
 
 
+def wave(theme, paths, widths=(34, 15, 8), hi=None, trail=None, dy=0):
+    """The glowing line. Bloom, mid stroke, body — then a hairline highlight."""
+    g = f'url(#accent-{theme})'
+    o = [f'<g transform="translate(0,{dy})" fill="none" stroke-linecap="round">']
+    o.append(f'<path d="{paths}" stroke="{g}" stroke-width="{widths[0]}" '
+             f'stroke-opacity=".45" filter="url(#bloom-{theme})"/>')
+    o.append(f'<path d="{paths}" stroke="{g}" stroke-width="{widths[1]}" '
+             f'stroke-opacity=".85" filter="url(#soft-{theme})"/>')
+    o.append(f'<path d="{paths}" stroke="{g}" stroke-width="{widths[2]}"/>')
+    if hi:
+        o.append(f'<path d="{hi}" stroke="{THEMES[theme]["hi"]}" '
+                 f'stroke-width="1.6" stroke-opacity=".55"/>')
+    if trail:
+        o.append(f'<path d="{trail}" stroke="{g}" stroke-width="3" '
+                 f'stroke-opacity=".40"/>')
+    o.append("</g>")
+    return "".join(o)
+
+
 def flow_box(t, x, y, w, h, title, sub):
     o = [f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="11" '
          f'fill="{t["panel"]}" stroke="{t["border"]}" stroke-width="1"/>']
@@ -218,42 +256,12 @@ def arrow(t, x, y):
 def build_card(theme):
     t = THEMES[theme]
     o = []
-    y = 0
 
-    # ---- terminal
-    ty = 48
-    th = 178
-    o.append(f'<rect x="{PAD}" y="{ty}" width="{INNER}" height="{th}" rx="14" '
-             f'fill="{t["panel"]}" stroke="{t["border"]}" stroke-width="1"/>')
-    o.append(txt(PAD + 28, ty + 44, "❯", size=16, fill=t["accent"],
-                 weight=700, family=MONO))
-    o.append(txt(PAD + 52, ty + 44, QUERY, size=16.5, fill=t["text"], family=MONO))
+    # ---- hero: the signature line, with the name sitting clear of it
+    o.append(wave(theme, HERO_WAVE, hi=HERO_WAVE_HI, trail=HERO_WAVE_TR))
 
-    # streaming pill, right aligned
-    pw, px = 150, W - PAD - 28 - 150
-    o.append(f'<rect x="{px}" y="{ty + 26}" width="{pw}" height="26" rx="13" '
-             f'fill="{t["panel2"]}" stroke="{t["border"]}" stroke-width="1"/>')
-    o.append(f'<circle cx="{px + 17}" cy="{ty + 39}" r="4" fill="{t["accent"]}"/>')
-    o.append(txt(px + 30, ty + 43, "VERIFIED", size=10.5, fill=t["muted"],
-                 weight=700, spacing="2", family=MONO))
-
-    cx = PAD + 28
-    for i, c in enumerate(CHIPS):
-        cw = 13 + 9.1 * len(c)
-        o.append(f'<rect x="{cx}" y="{ty + 68}" width="{cw}" height="30" rx="8" '
-                 f'fill="{t["panel2"]}" stroke="{t["border"]}" stroke-width="1"/>')
-        o.append(txt(cx + cw / 2, ty + 88, c, size=11, fill=t["muted"],
-                     weight=700, spacing="1.9", family=MONO, anchor="middle"))
-        cx += cw
-        if i < len(CHIPS) - 1:
-            o.append(txt(cx + 11, ty + 88, "›", size=14, fill=t["dim"],
-                         family=MONO, anchor="middle"))
-            cx += 22
-    o.append(txt(PAD + 28, ty + 142, ANSWER, size=15.5, fill=t["muted"], family=MONO))
-
-    # ---- identity
-    y = ty + th + 62
-    o.append(f'<rect x="{PAD}" y="{y - 46}" width="5" height="62" rx="2.5" '
+    y = 152
+    o.append(f'<rect x="{PAD}" y="{y - 48}" width="5" height="64" rx="2.5" '
              f'fill="url(#accent-{theme})"/>')
     o.append(txt(PAD + 22, y, NAME, size=57, fill=t["text"], weight=800, spacing="7"))
     y += 44
@@ -264,7 +272,7 @@ def build_card(theme):
     o.append(txt(PAD + 24, y, AFFIL, size=13.5, fill=t["dim"]))
 
     # ---- what I build
-    y += 66
+    y += 152
     o.append(section(t, y, "WHAT I BUILD"))
     y += 38
     for label, desc in WHAT:
@@ -343,7 +351,18 @@ def build_card(theme):
         o.append(txt(x + col_w / 2, y + 32 + len(item["desc"]) * 24 + 10,
                      item["stack"], size=13, fill=t["dim"], anchor="middle"))
 
-    y += 32 + 2 * 24 + 10 + 78
+    y += 32 + 2 * 24 + 10 + 74
+
+    # ---- how I work: the four principles, sitting on the line
+    o.append(section(t, y, "HOW I WORK"))
+    y += 22
+    o.append(wave(theme, PRINCIPLES_WAVE, widths=(26, 11, 6), dy=y))
+    for px3, py3, label in PRINCIPLES:
+        o.append(f'<circle cx="{px3}" cy="{y + py3}" r="9" fill="{t["bg"]}" '
+                 f'stroke="{t["accent"]}" stroke-width="3"/>')
+        o.append(txt(px3, y + py3 - 32, label, size=13, fill=t["text"],
+                     weight=700, spacing="2.8", anchor="middle"))
+    y += 200
 
     # ---- architecture
     o.append(section(t, y, "ARCHITECTURE"))
@@ -387,10 +406,16 @@ def build_card(theme):
       <stop offset="55%" stop-color="{t["accent2"]}"/>
       <stop offset="100%" stop-color="{t["accent4"]}"/>
     </linearGradient>
-    <radialGradient id="halo-{theme}" cx="78%" cy="12%" r="52%">
+    <radialGradient id="halo-{theme}" cx="66%" cy="6%" r="58%">
       <stop offset="0%" stop-color="{t["accent2"]}" stop-opacity="{t["halo"]}"/>
       <stop offset="100%" stop-color="{t["bg"]}" stop-opacity="0"/>
     </radialGradient>
+    <filter id="bloom-{theme}" x="-20%" y="-400%" width="140%" height="900%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <filter id="soft-{theme}" x="-20%" y="-400%" width="140%" height="900%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
     <clipPath id="card-{theme}"><rect x="1" y="1" width="{W - 2}" height="{height - 2}" rx="20"/></clipPath>
   </defs>'''
 
@@ -405,9 +430,8 @@ def build_card(theme):
 
 
 ALT = (
-    "A question typed at the top of the card, what actually makes regulated software "
-    "trustworthy, routed through four steps, scan, verify, explain, report, and answered: "
-    "the source stays authoritative, I build the layer that makes it usable. Abdullah Al "
+    "A glowing cyan-to-blue line flows across the top of the card, the same line that "
+    "runs through the profile picture. Abdullah Al "
     "Tamimi, technical founder and product engineer, building the layer between "
     "authoritative data and the person who has to act on it, 9XAI Fellow at Al Hussein "
     "Technical University in Jordan. What I build: healthcare, GS1 pack verification, "
@@ -427,7 +451,9 @@ ALT = (
     "governorate beyond Petra: plan a trip and book a local guide at a price you can see up "
     "front, in FastAPI, PostgreSQL, React 18, Leaflet and OpenAI vision. VOC-360, a national "
     "citizen-experience platform that ingests public feedback, classifies it and traces each "
-    "issue to its root cause, in FastAPI, PostgreSQL, Redis, Docker and pandas. Architecture: "
+    "issue to its root cause, in FastAPI, PostgreSQL, Redis, Docker and pandas. How I work, "
+    "four principles set on the same glowing line: founder mindset, better everyday, ideas to "
+    "impact, progress over perfection. Architecture: "
     "the request travels scan, GS1 DataMatrix, to profile, Supabase row-level security, to "
     "smart view, OpenAI, to report, MedDRA to E2B, and the official leaflet stays the "
     "authoritative source at every step; the platform beneath is PostgreSQL as the relational "
