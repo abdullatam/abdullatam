@@ -87,6 +87,9 @@ ROLES = [
 ]
 ROLE_SECONDS = 4.5            # each role holds this long
 HERO_WAVE_LEN = 1438          # measured off the path; drives the shimmer
+REQ_SECONDS = 7.0             # one request, end to end, through the architecture
+SWEEP_W = 104                 # width of the band that crosses the request row
+NODE_PEAK = 0.03              # where in nodeGlow the lit frame sits, as a fraction
 
 PITCH = "Building the layer between authoritative data and the person who has to act on it."
 AFFIL = "9XAI Fellow · Al Hussein Technical University · Jordan"
@@ -256,19 +259,31 @@ def wave(theme, paths, widths=(34, 15, 8), hi=None, trail=None, dy=0, shimmer=Fa
     return "".join(o)
 
 
-def flow_box(t, x, y, w, h, title, sub):
+def flow_box(t, x, y, w, h, title, sub, glow=None):
+    """A node. `glow` adds a lit copy of the border that the stylesheet fades
+    up as the request pulse reaches it; it is opacity 0 in the markup, so a
+    renderer that ignores the stylesheet just gets the diagram."""
     o = [f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="11" '
          f'fill="{t["panel"]}" stroke="{t["border"]}" stroke-width="1"/>']
+    if glow:
+        o.append(f'<rect class="{glow}" x="{x}" y="{y}" width="{w}" height="{h}" '
+                 f'rx="11" fill="{t["accent"]}" fill-opacity=".08" '
+                 f'stroke="{t["accent"]}" stroke-width="1.8" opacity="0"/>')
     o.append(txt(x + w / 2, y + 31, title, size=14.5, fill=t["text"],
                  weight=700, spacing="2.2", anchor="middle"))
     o.append(txt(x + w / 2, y + 52, sub, size=12.5, fill=t["dim"], anchor="middle"))
     return "".join(o)
 
 
-def arrow(t, x, y):
-    return (f'<path d="M{x} {y}h16m-5 -4l5 4l-5 4" fill="none" '
-            f'stroke="{t["border"]}" stroke-width="1.6" stroke-linecap="round" '
-            f'stroke-linejoin="round"/>')
+def arrow(t, x, y, glow=None):
+    d = f"M{x} {y}h16m-5 -4l5 4l-5 4"
+    o = [f'<path d="{d}" fill="none" stroke="{t["border"]}" stroke-width="1.6" '
+         f'stroke-linecap="round" stroke-linejoin="round"/>']
+    if glow:
+        o.append(f'<path class="{glow}" d="{d}" fill="none" stroke="{t["accent"]}" '
+                 f'stroke-width="2.4" stroke-linecap="round" '
+                 f'stroke-linejoin="round" opacity="0"/>')
+    return "".join(o)
 
 
 # ---------------------------------------------------------------- the card
@@ -397,17 +412,51 @@ def build_card(theme):
     bw, bh, gap = 260, 74, 32
     total = len(REQUEST) * bw + (len(REQUEST) - 1) * gap
     x0 = PAD + (INNER - total) / 2
+    mid = y + bh / 2
+
+    # The rail and the pulse go down FIRST, so every node painted after them
+    # occludes the light: it travels the gaps, disappears into a box, and
+    # comes out the far side. Where it is along the rail decides the delays
+    # below, so both come off the same geometry.
+    # When the band's bright edge is over a given x, as a fraction of the
+    # cycle. The band starts one width off-screen left and its brightest point
+    # sits at 82% of its own width, so both offsets go into the sum — get this
+    # wrong and the boxes light progressively later than the light reaches them.
+    travel = total + SWEEP_W * 2
+
+    def lit_at(cx):
+        return (cx + 0.18 * SWEEP_W) / travel
+
+    box_at = [lit_at(i * (bw + gap) + bw / 2) for i in range(len(REQUEST))]
+    arrow_at = [lit_at(i * (bw + gap) + bw + 16) for i in range(len(REQUEST) - 1)]
+
+    o.append(f'<line x1="{x0}" y1="{mid}" x2="{x0 + total}" y2="{mid}" '
+             f'stroke="{t["border_soft"]}" stroke-width="1.5"/>')
+
     for i, (title, sub) in enumerate(REQUEST):
         bx = x0 + i * (bw + gap)
-        o.append(flow_box(t, bx, y, bw, bh, title, sub))
+        o.append(flow_box(t, bx, y, bw, bh, title, sub, glow=f"fglow g{i + 1}"))
         if i < len(REQUEST) - 1:
-            o.append(arrow(t, bx + bw + 8, y + bh / 2))
+            o.append(arrow(t, bx + bw + 8, mid, glow=f"aglow a{i + 1}"))
+
+    # The request itself: a soft band crossing the row. A dot was the first
+    # idea and it was wrong — the boxes cover 1040 of the 1136 units it
+    # travels, so it was hidden nine tenths of the way. A band drawn OVER the
+    # row is visible the whole crossing and never collides with the labels.
+    o.append(f'<rect class="req-sweep" x="{x0 - SWEEP_W}" y="{y - 8}" '
+             f'width="{SWEEP_W}" height="{bh + 16}" rx="8" '
+             f'fill="url(#sweep-{theme})"/>')
 
     # the dashed return path, drawn under the row
     ly = y + bh + 30
-    o.append(f'<path d="M{x0 + 30} {y + bh} V{ly} H{x0 + total - 30} V{y + bh}" '
+    o.append(f'<path class="req-return" d="M{x0 + 30} {y + bh} V{ly} '
+             f'H{x0 + total - 30} V{y + bh}" '
              f'fill="none" stroke="{t["border"]}" stroke-width="1.2" '
              f'stroke-dasharray="4 5"/>')
+    o.append(f'<g class="req-back">'
+             f'<circle cx="{x0 + total - 30}" cy="{ly}" r="11" fill="{t["accent"]}" '
+             f'opacity=".45" filter="url(#soft-{theme})"/>'
+             f'<circle cx="{x0 + total - 30}" cy="{ly}" r="3.6" fill="{t["hi"]}"/></g>')
     o.append(txt(W / 2, ly + 26, REQUEST_NOTE, size=13, fill=t["dim"], anchor="middle"))
 
     y = ly + 62
@@ -418,7 +467,7 @@ def build_card(theme):
     pbw = (INNER - 3 * gap) / 4
     for i, (title, sub) in enumerate(PLATFORM):
         bx = PAD + i * (pbw + gap)
-        o.append(flow_box(t, bx, y, pbw, bh, title, sub))
+        o.append(flow_box(t, bx, y, pbw, bh, title, sub, glow=f"pglow p{i + 1}"))
         if i < len(PLATFORM) - 1:
             o.append(arrow(t, bx + pbw + 8, y + bh / 2))
 
@@ -434,6 +483,12 @@ def build_card(theme):
       <stop offset="0%" stop-color="{t["accent2"]}" stop-opacity="{t["halo"]}"/>
       <stop offset="100%" stop-color="{t["bg"]}" stop-opacity="0"/>
     </radialGradient>
+    <linearGradient id="sweep-{theme}" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="{t["accent"]}" stop-opacity="0"/>
+      <stop offset="50%" stop-color="{t["accent"]}" stop-opacity=".20"/>
+      <stop offset="82%" stop-color="{t["hi"]}" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="{t["hi"]}" stop-opacity="0"/>
+    </linearGradient>
     <filter id="bloom-{theme}" x="-20%" y="-400%" width="140%" height="900%">
       <feGaussianBlur stdDeviation="22"/>
     </filter>
@@ -464,12 +519,46 @@ def build_card(theme):
   from{{stroke-dashoffset:{HERO_WAVE_LEN + 210}}}
   to{{stroke-dashoffset:0}}
 }}""")
-    # Motion is decoration here; the first role is the one that must survive.
+    # The request: one pulse down the rail, each node lighting as it arrives.
+    # Delays come from box_at/arrow_at, so moving a box moves its flash too.
+    css.append(f""".req-sweep{{animation:reqFlow {REQ_SECONDS:g}s linear infinite}}
+@keyframes reqFlow{{
+  0%{{transform:translateX(0)}}
+  100%{{transform:translateX({total + SWEEP_W * 2:g}px)}}
+}}
+.req-back{{animation:reqBack {REQ_SECONDS:g}s ease-in-out infinite}}
+@keyframes reqBack{{
+  0%,62%{{transform:translateX(0);opacity:0}}
+  67%{{opacity:1}}
+  93%{{opacity:1}}
+  100%{{transform:translateX({-(total - 60):g}px);opacity:0}}
+}}
+.fglow,.aglow{{animation:nodeGlow {REQ_SECONDS:g}s linear infinite}}
+@keyframes nodeGlow{{
+  0%{{opacity:0}}
+  {NODE_PEAK * 100:g}%{{opacity:1}}
+  {NODE_PEAK * 100 + 11:g}%{{opacity:0}}
+  100%{{opacity:0}}
+}}
+.req-return{{animation:reqDash 1.1s linear infinite}}
+@keyframes reqDash{{from{{stroke-dashoffset:0}}to{{stroke-dashoffset:18}}}}
+.pglow{{animation:svcPulse {REQ_SECONDS * 1.6:g}s ease-in-out infinite}}
+@keyframes svcPulse{{0%,100%{{opacity:0}}50%{{opacity:.5}}}}""")
+    for i, f in enumerate(box_at):
+        css.append(f".g{i + 1}{{animation-delay:{(f - NODE_PEAK) * REQ_SECONDS:.2f}s}}")
+    for i, f in enumerate(arrow_at):
+        css.append(f".a{i + 1}{{animation-delay:{(f - NODE_PEAK) * REQ_SECONDS:.2f}s}}")
+    for i in range(len(PLATFORM)):
+        css.append(f".p{i + 1}{{animation-delay:{i * 0.9:g}s}}")
+
+    # Motion is decoration here; the first role is the one that must survive,
+    # and the diagram has to stay readable with every animation switched off.
     others = ",".join(f".r{i + 1}" for i in range(1, len(ROLES)))
     css.append("@media(prefers-reduced-motion:reduce){"
-               ".role,.shimmer{animation:none}"
+               ".role,.shimmer,.req-sweep,.req-back,.fglow,.aglow,.pglow,.req-return"
+               "{animation:none}"
                f".r1{{opacity:1}}{others}{{opacity:0}}"
-               ".shimmer{display:none}}")
+               ".shimmer,.req-sweep,.req-back{display:none}}")
     css.append("</style>")
     style = "".join(css)
 
@@ -509,9 +598,10 @@ ALT = (
     "citizen-experience platform that ingests public feedback, classifies it and traces each "
     "issue to its root cause, in FastAPI, PostgreSQL, Redis, Docker and pandas. How I work, "
     "four principles set on the same glowing line: founder mindset, better everyday, ideas to "
-    "impact, progress over perfection. Architecture: "
-    "the request travels scan, GS1 DataMatrix, to profile, Supabase row-level security, to "
-    "smart view, OpenAI, to report, MedDRA to E2B, and the official leaflet stays the "
+    "impact, progress over perfection. Architecture, animated: a band of light crosses the "
+    "request row and each step lights as the light reaches it — scan, GS1 DataMatrix, to "
+    "profile, Supabase row-level security, to smart view, OpenAI, to report, MedDRA to E2B — "
+    "then a pulse returns along the dashed path beneath, where the official leaflet stays the "
     "authoritative source at every step; the platform beneath is PostgreSQL as the relational "
     "store, Supabase Auth for identity, OpenAI for summarisation, and i18next for Arabic and "
     "English right-to-left."
