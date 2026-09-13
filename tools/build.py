@@ -73,7 +73,21 @@ PRINCIPLES = [
 ]
 
 NAME = "ABDULLAH AL TAMIMI"
-ROLE = "Technical Founder · Product Engineer"
+
+# The role line cycles. Every one of these is something the profile or the work
+# already says: the GitHub bio names LeafleX, AI & automation and full-stack;
+# the three domains are the three products. The first is the fallback — it is
+# the only one with opacity 1 in the markup, so a renderer that ignores the
+# stylesheet shows it and nothing overlaps.
+ROLES = [
+    "Technical Founder · Product Engineer",
+    "Founder @ LeafleX · Nashrati",
+    "AI & Automation · Full-Stack Developer",
+    "Healthcare · Education · Government Software",
+]
+ROLE_SECONDS = 4.5            # each role holds this long
+HERO_WAVE_LEN = 1438          # measured off the path; drives the shimmer
+
 PITCH = "Building the layer between authoritative data and the person who has to act on it."
 AFFIL = "9XAI Fellow · Al Hussein Technical University · Jordan"
 
@@ -216,7 +230,7 @@ def tile(t, cx, y, slug, label):
     return "".join(o)
 
 
-def wave(theme, paths, widths=(34, 15, 8), hi=None, trail=None, dy=0):
+def wave(theme, paths, widths=(34, 15, 8), hi=None, trail=None, dy=0, shimmer=False):
     """The glowing line. Bloom, mid stroke, body — then a hairline highlight."""
     g = f'url(#accent-{theme})'
     o = [f'<g transform="translate(0,{dy})" fill="none" stroke-linecap="round">']
@@ -231,6 +245,13 @@ def wave(theme, paths, widths=(34, 15, 8), hi=None, trail=None, dy=0):
     if trail:
         o.append(f'<path d="{trail}" stroke="{g}" stroke-width="3" '
                  f'stroke-opacity=".40"/>')
+    if shimmer:
+        # A short bright dash walking the full length, so the line reads as lit
+        # rather than painted. One dash, one gap, the pattern as long as the
+        # path — which is what makes the loop seamless.
+        o.append(f'<path class="shimmer" d="{paths}" '
+                 f'stroke="{THEMES[theme]["hi"]}" stroke-width="4" '
+                 f'stroke-opacity=".9" filter="url(#soft-{theme})"/>')
     o.append("</g>")
     return "".join(o)
 
@@ -258,14 +279,17 @@ def build_card(theme):
     o = []
 
     # ---- hero: the signature line, with the name sitting clear of it
-    o.append(wave(theme, HERO_WAVE, hi=HERO_WAVE_HI, trail=HERO_WAVE_TR))
+    o.append(wave(theme, HERO_WAVE, hi=HERO_WAVE_HI, trail=HERO_WAVE_TR, shimmer=True))
 
     y = 152
     o.append(f'<rect x="{PAD}" y="{y - 48}" width="5" height="64" rx="2.5" '
              f'fill="url(#accent-{theme})"/>')
     o.append(txt(PAD + 22, y, NAME, size=57, fill=t["text"], weight=800, spacing="7"))
     y += 44
-    o.append(txt(PAD + 24, y, ROLE, size=20.5, fill=t["text"], weight=700))
+    for i, role in enumerate(ROLES):
+        o.append(f'<g class="role r{i + 1}" opacity="{1 if i == 0 else 0}">'
+                 + txt(PAD + 24, y, role, size=20.5, fill=t["text"], weight=700)
+                 + "</g>")
     y += 30
     o.append(txt(PAD + 24, y, PITCH, size=16, fill=t["muted"]))
     y += 27
@@ -419,9 +443,39 @@ def build_card(theme):
     <clipPath id="card-{theme}"><rect x="1" y="1" width="{W - 2}" height="{height - 2}" rx="20"/></clipPath>
   </defs>'''
 
-    body = "".join(o)
+    cycle = ROLE_SECONDS * len(ROLES)
+    hold = 100.0 / len(ROLES)           # share of the cycle each role owns
+    css = ["<style>"]
+    css.append(f""".role{{animation:roleCycle {cycle}s linear infinite}}
+@keyframes roleCycle{{
+  0%{{opacity:0;transform:translateY(7px)}}
+  {hold * 0.10:.2f}%{{opacity:1;transform:translateY(0)}}
+  {hold * 0.86:.2f}%{{opacity:1;transform:translateY(0)}}
+  {hold:.2f}%{{opacity:0;transform:translateY(-7px)}}
+  100%{{opacity:0;transform:translateY(-7px)}}
+}}""")
+    for i in range(len(ROLES)):
+        css.append(f".r{i + 1}{{animation-delay:{i * ROLE_SECONDS:g}s}}")
+    css.append(f""".shimmer{{
+  stroke-dasharray:210 {HERO_WAVE_LEN};
+  animation:shimmerRun {cycle / 2:g}s linear infinite
+}}
+@keyframes shimmerRun{{
+  from{{stroke-dashoffset:{HERO_WAVE_LEN + 210}}}
+  to{{stroke-dashoffset:0}}
+}}""")
+    # Motion is decoration here; the first role is the one that must survive.
+    others = ",".join(f".r{i + 1}" for i in range(1, len(ROLES)))
+    css.append("@media(prefers-reduced-motion:reduce){"
+               ".role,.shimmer{animation:none}"
+               f".r1{{opacity:1}}{others}{{opacity:0}}"
+               ".shimmer{display:none}}")
+    css.append("</style>")
+    style = "".join(css)
+
+    body = style + "".join(o)
     return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {W} {height}" width="{W}" height="{height}" role="img" aria-label="{esc(ALT)}">
-  <title>{esc(NAME.title())} — {esc(ROLE)}</title>
+  <title>{esc(NAME.title())} — {esc(ROLES[0])}</title>
   {defs}
   <rect x="1" y="1" width="{W - 2}" height="{height - 2}" rx="20" fill="{t["bg"]}"/>
   <g clip-path="url(#card-{theme})"><rect width="{W}" height="{height}" fill="url(#halo-{theme})"/>{body}</g>
@@ -431,8 +485,10 @@ def build_card(theme):
 
 ALT = (
     "A glowing cyan-to-blue line flows across the top of the card, the same line that "
-    "runs through the profile picture. Abdullah Al "
-    "Tamimi, technical founder and product engineer, building the layer between "
+    "runs through the profile picture, with a bright point of light travelling along "
+    "it. Abdullah Al Tamimi. The role beneath the name cycles through four: technical "
+    "founder and product engineer; founder at LeafleX and Nashrati; AI and automation "
+    "and full-stack developer; healthcare, education and government software. Building the layer between "
     "authoritative data and the person who has to act on it, 9XAI Fellow at Al Hussein "
     "Technical University in Jordan. What I build: healthcare, GS1 pack verification, "
     "MedDRA-coded adverse-event reporting and E2B CIOMS export; education, teacher and "
