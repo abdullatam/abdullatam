@@ -11,6 +11,7 @@
 <p align="center">
   <a href="https://github.com/abdullatam"><img src="https://img.shields.io/badge/GitHub-abdullatam-071A3D?style=flat-square&logo=github&logoColor=67E8FF" alt="GitHub"></a>
   <a href="mailto:tamimiabdulla418@gmail.com"><img src="https://img.shields.io/badge/Email-tamimiabdulla418%40gmail.com-071A3D?style=flat-square&logo=gmail&logoColor=67E8FF" alt="Email"></a>
+  <a href="https://www.linkedin.com/in/abdulla-tamimi"><img src="https://img.shields.io/badge/LinkedIn-abdulla--tamimi-071A3D?style=flat-square&labelColor=071A3D" alt="LinkedIn"></a>
   <img src="https://img.shields.io/badge/Jordan-071A3D?style=flat-square&logo=googlemaps&logoColor=67E8FF" alt="Jordan">
   <img src="https://img.shields.io/badge/Arabic%20%2B%20English-bilingual%20by%20default-071A3D?style=flat-square&logo=googletranslate&logoColor=67E8FF" alt="Bilingual">
 </p>
@@ -153,6 +154,25 @@ decision brief and the Minister View severity-report cards.
 
 ---
 
+### Tammy AI — a co-founder that remembers
+
+**Live at [tammy-ai.com](https://tammy-ai.com/).** Not a chatbot: an AI that holds the thread
+across every session — emotional trajectories, contradictions, avoidance patterns — and answers
+with *insight → tension → question* rather than empathy and validation.
+
+The engineering problem is memory. Three tiers behind one interface: Redis for the live
+conversation, MongoDB for sessions and profiles, Pinecone for semantic recall and RAG over a
+proprietary corpus — with a query classifier deciding which tier a question actually needs and a
+context builder assembling the prompt under a hard token budget. Voice in and out, Arabic and
+English.
+
+`FastAPI` · `SSE streaming` · `Claude` (primary) → `OpenAI` (fallback) · `Pinecone` · `MongoDB` ·
+`Redis` · `LangChain` · `Speechmatics` STT · OpenAI TTS — [repo](https://github.com/abdullatam/tammyai)
+
+Built with Tamer Masri and Omar.
+
+---
+
 <details>
 <summary><b>More things I've built</b></summary>
 
@@ -160,7 +180,6 @@ decision brief and the Minister View severity-report cards.
 
 | Project | What it is | Stack |
 |---|---|---|
-| **Tammy AI** | An emotionally intelligent "digital co-founder" — multi-tier memory (short-term, long-term, semantic), RAG over a proprietary corpus, voice in and out. Built with Tamer Masri and Omar. | FastAPI · SSE · Claude (primary) → OpenAI (fallback) · Pinecone · MongoDB · Redis · LangChain · Speechmatics STT · OpenAI TTS · [repo](https://github.com/abdullatam/tammyai) |
 | **Moodle Team 1 — Course Builder & Player** | Rebuilt the essential parts of how Moodle represents a course — availability trees, completion rules, reuse — by understanding it, not copying it. **My scope: copy, backup, restore, `.mbz` import, date-shifting and the honest ledger of what information gets lost.** | FastAPI · SQLite · React · TypeScript · Vite |
 | **Nasher AI** | AI content platform for government. I built the full frontend from scratch — idea search, AI generator, dashboard, content library, workflow, bilingual EN/AR — and ran the RAG pipeline, backend and frontend together locally. Produced the Ministry Alignment Report. | React · FastAPI · RAG · Docker Compose |
 | **Traffic monitoring & flow forecasting** | 9XAI hackathon, solo repo. A reproducible data sandbox for Wasfi Al-Tal / Mecca St, Amman — 22 detectors × 14 days of counts, signal logs, labelled ground-truth events — a SUMO simulation network, YOLO live licence-plate detection (NMS + spatial tracking + majority vote) served as an annotated MJPEG stream, and a bilingual what-if signal-timing simulator. | Python · Ultralytics YOLO · SUMO · pandas<br><sub>private repo</sub> |
@@ -186,7 +205,7 @@ decision brief and the Minister View severity-report cards.
 
 ## Experience
 
-**Founder — LeafleX / Nashrati** · Jordan
+**Founder — [LeafleX](https://www.linkedin.com/company/leaflexx) / Nashrati** · Jordan
 - Built Nashrati end to end: a bilingual medication-safety product with GS1 pack verification, a MedDRA-coded adverse-reaction pipeline exporting E2B/CIOMS XML, and a pharmacist accountability log.
 - Designed the Postgres schema and RLS model for patient, pharmacist and manufacturer roles.
 - Drew and defended the product boundary between presenting an official leaflet and giving medical advice — the constraint that shaped every screen.
@@ -305,6 +324,7 @@ to talk about building products in Jordan and the region, reach out.
 
 <p align="center">
   <a href="mailto:tamimiabdulla418@gmail.com"><img src="https://img.shields.io/badge/Email%20me-071A3D?style=for-the-badge&logo=gmail&logoColor=67E8FF" alt="Email"></a>
+  <a href="https://www.linkedin.com/in/abdulla-tamimi"><img src="https://img.shields.io/badge/Connect%20on%20LinkedIn-071A3D?style=for-the-badge&labelColor=071A3D" alt="LinkedIn"></a>
   <a href="https://github.com/abdullatam"><img src="https://img.shields.io/badge/Follow%20on%20GitHub-071A3D?style=for-the-badge&logo=github&logoColor=67E8FF" alt="GitHub"></a>
 </p>
 
