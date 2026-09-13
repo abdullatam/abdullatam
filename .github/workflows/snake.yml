@@ -30,3 +30,37 @@ jobs:
           build_dir: dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # The calendar on the card is baked in at build time, so without this it
+  # would freeze at whatever the numbers were on the day it was drawn. Refetch,
+  # redraw, and commit only when the bytes actually changed.
+  calendar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet Pillow
+
+      - name: Refetch the contribution calendar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 tools/fetch_data.py
+
+      - name: Redraw the card
+        run: python3 tools/build.py
+
+      - name: Commit if the card changed
+        run: |
+          if git diff --quiet -- assets tools/data; then
+            echo "card unchanged — nothing to commit"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets tools/data
+          git commit -m "Redraw the card with today's contribution calendar"
+          git push

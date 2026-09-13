@@ -16,6 +16,7 @@ immediately — camo caches on the URL, not on the bytes behind it.
 import base64
 import glob
 import io
+import json
 import os
 import re
 import xml.sax.saxutils as sx
@@ -38,12 +39,14 @@ THEMES = {
         border_soft="#152D4A", text="#F5F7FF", muted="#94A3B8", dim="#64748B",
         accent="#18D7FF", accent2="#008CFF", accent3="#1769FF", accent4="#635BFF",
         icon="#CBD5E1", tile="#0E1F38", tile_border="#1E3A5F", halo=".30", hi="#67E8FF",
+        cal=["#0E1F38", "#0E3A5C", "#0B6FA8", "#12A8DC", "#18D7FF"],
     ),
     "light": dict(
         bg="#FFFFFF", panel="#F4F8FF", panel2="#EDF4FF", border="#CBDBF2",
         border_soft="#DCE8F8", text="#08101F", muted="#475569", dim="#7C8BA1",
         accent="#0A79C7", accent2="#0B6BD4", accent3="#1B5FD0", accent4="#5B52E8",
         icon="#334155", tile="#FFFFFF", tile_border="#D3E1F5", halo=".10", hi="#8FD4FF",
+        cal=["#E6EFFA", "#BFDDF5", "#79B8E8", "#2E8BD4", "#0A79C7"],
     ),
 }
 
@@ -178,6 +181,39 @@ def load_icons():
 
 ICONS = load_icons()
 _SHOT_CACHE = {}
+
+CELL, CELL_GAP, CAL_WEEKS = 14, 4.5, 53
+MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+
+def load_calendar():
+    """The cached calendar, or None — the card still builds without it."""
+    f = os.path.join(ROOT, "tools", "data", "contributions.json")
+    if not os.path.exists(f):
+        return None
+    cal = json.load(open(f, encoding="utf-8"))
+    days = [d for w in cal["weeks"] for d in w["contributionDays"]]
+    counts = sorted(d["contributionCount"] for d in days if d["contributionCount"] > 0)
+    # Quartiles of the ACTIVE days, not of all 365 — otherwise on a calendar
+    # this sparse every threshold lands on zero and the grid is one flat colour.
+    cuts = [counts[len(counts) * k // 4] for k in (1, 2, 3)] if counts else [1, 2, 3]
+
+    def level(n):
+        if n <= 0:
+            return 0
+        return 1 + sum(n >= c for c in cuts)
+
+    best = cur = 0
+    for d in days:
+        cur = cur + 1 if d["contributionCount"] > 0 else 0
+        best = max(best, cur)
+
+    return dict(total=cal["totalContributions"], weeks=cal["weeks"],
+                active=len(counts), streak=best, level=level)
+
+
+CALENDAR = load_calendar()
 
 
 def shot(name):
@@ -468,7 +504,68 @@ def build_card(theme):
         if i < len(PLATFORM) - 1:
             o.append(arrow(t, bx + pbw + 8, y + bh / 2))
 
-    height = y + bh + 56
+    # ---- this year: the calendar GitHub publishes, in the card's colours
+    y += bh + 74
+    if CALENDAR:
+        c = CALENDAR
+        o.append(section(t, y, "THIS YEAR"))
+        o.append(txt(W - PAD, y, f"{c['total']} contributions · {c['active']} active days "
+                                 f"· {c['streak']}-day streak",
+                     size=13, fill=t["muted"], anchor="end"))
+        y += 30
+
+        step = CELL + CELL_GAP
+        grid_w = CAL_WEEKS * step
+        label_w = 40
+        bx0 = PAD + (INNER - (label_w + grid_w)) / 2
+        gx = bx0 + label_w
+        weeks = c["weeks"][-CAL_WEEKS:]
+
+        # A month gets a label on the week it first appears. Keyed on year-month,
+        # because this window opens and closes in the same month.
+        last = None
+        for wi, wk in enumerate(weeks):
+            d0 = wk["contributionDays"][0]["date"]
+            ym = d0[:7]
+            if ym != last:
+                last = ym
+                if wi < CAL_WEEKS - 1:
+                    o.append(txt(gx + wi * step, y, MONTHS[int(d0[5:7]) - 1],
+                                 size=10.5, fill=t["dim"]))
+        y += 14
+
+        for di, lab in ((1, "Mon"), (3, "Wed"), (5, "Fri")):
+            o.append(txt(gx - 10, y + di * step + 11, lab,
+                         size=10.5, fill=t["dim"], anchor="end"))
+
+        for wi, wk in enumerate(weeks):
+            for d in wk["contributionDays"]:
+                lv = c["level"](d["contributionCount"])
+                o.append(f'<rect x="{gx + wi * step:.1f}" '
+                         f'y="{y + d["weekday"] * step:.1f}" '
+                         f'width="{CELL}" height="{CELL}" rx="3" '
+                         f'fill="{t["cal"][lv]}"/>')
+
+        # A slow band over the grid, the same idiom as the request row — clipped
+        # to the cells so it never sits on the Mon/Wed/Fri labels, which is
+        # where it parks at the start and end of every loop.
+        o.append(f'<clipPath id="calclip-{theme}"><rect x="{gx}" y="{y - 4}" '
+                 f'width="{grid_w}" height="{7 * step + 4}"/></clipPath>')
+        o.append(f'<g clip-path="url(#calclip-{theme})">'
+                 f'<rect class="cal-sweep" x="{gx - SWEEP_W}" y="{y - 4}" '
+                 f'width="{SWEEP_W}" height="{7 * step + 4}" rx="6" '
+                 f'fill="url(#sweep-{theme})"/></g>')
+
+        y += 7 * step + 22
+        lx = gx + grid_w
+        o.append(txt(lx - 5 * step - 34, y, "Less", size=10.5, fill=t["dim"], anchor="end"))
+        for i in range(5):
+            o.append(f'<rect x="{lx - (5 - i) * step - 26:.1f}" y="{y - 10}" '
+                     f'width="{CELL}" height="{CELL}" rx="3" fill="{t["cal"][i]}"/>')
+        o.append(txt(lx, y, "More", size=10.5, fill=t["dim"], anchor="end"))
+        y += 6
+
+    height = y + 52
 
     defs = f'''<defs>
     <linearGradient id="accent-{theme}" x1="0%" y1="100%" x2="0%" y2="0%">
@@ -540,6 +637,11 @@ def build_card(theme):
 .req-return{{animation:reqDash 1.1s linear infinite}}
 @keyframes reqDash{{from{{stroke-dashoffset:0}}to{{stroke-dashoffset:18}}}}
 .pglow{{animation:svcPulse {REQ_SECONDS * 1.6:g}s ease-in-out infinite}}
+.cal-sweep{{animation:calFlow {REQ_SECONDS * 2:g}s linear infinite}}
+@keyframes calFlow{{
+  0%{{transform:translateX(0)}}
+  100%{{transform:translateX({CAL_WEEKS * (CELL + CELL_GAP) + SWEEP_W * 2:g}px)}}
+}}
 @keyframes svcPulse{{0%,100%{{opacity:0}}50%{{opacity:.5}}}}""")
     for i, f in enumerate(box_at):
         css.append(f".g{i + 1}{{animation-delay:{(f - NODE_PEAK) * REQ_SECONDS:.2f}s}}")
@@ -552,15 +654,22 @@ def build_card(theme):
     # and the diagram has to stay readable with every animation switched off.
     others = ",".join(f".r{i + 1}" for i in range(1, len(ROLES)))
     css.append("@media(prefers-reduced-motion:reduce){"
-               ".role,.shimmer,.req-sweep,.req-back,.fglow,.aglow,.pglow,.req-return"
+               ".role,.shimmer,.req-sweep,.req-back,.cal-sweep,.fglow,.aglow,.pglow,.req-return"
                "{animation:none}"
                f".r1{{opacity:1}}{others}{{opacity:0}}"
-               ".shimmer,.req-sweep,.req-back{display:none}}")
+               ".shimmer,.req-sweep,.req-back,.cal-sweep{display:none}}")
     css.append("</style>")
     style = "".join(css)
 
+    alt = ALT
+    if CALENDAR:
+        alt += (f" This year: the contribution calendar GitHub publishes, drawn in the "
+                f"card's colours — {CALENDAR['total']} contributions, "
+                f"{CALENDAR['active']} active days, and a longest streak of "
+                f"{CALENDAR['streak']} days.")
+
     body = style + "".join(o)
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {W} {height}" width="{W}" height="{height}" role="img" aria-label="{esc(ALT)}">
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {W} {height}" width="{W}" height="{height}" role="img" aria-label="{esc(alt)}">
   <title>{esc(NAME.title())} — {esc(ROLES[0])}</title>
   {defs}
   <rect x="1" y="1" width="{W - 2}" height="{height - 2}" rx="20" fill="{t["bg"]}"/>
