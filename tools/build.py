@@ -92,7 +92,6 @@ SWEEP_W = 104                 # width of the band that crosses the request row
 NODE_PEAK = 0.03              # where in nodeGlow the lit frame sits, as a fraction
 
 PITCH = "Building the layer between authoritative data and the person who has to act on it."
-AFFIL = "9XAI Fellow · Al Hussein Technical University · Jordan"
 
 WHAT = [
     ("HEALTHCARE", "GS1 pack verification, MedDRA-coded adverse-event reporting, E2B / CIOMS export"),
@@ -307,11 +306,9 @@ def build_card(theme):
                  + "</g>")
     y += 30
     o.append(txt(PAD + 24, y, PITCH, size=16, fill=t["muted"]))
-    y += 27
-    o.append(txt(PAD + 24, y, AFFIL, size=13.5, fill=t["dim"]))
 
     # ---- what I build
-    y += 152
+    y += 179
     o.append(section(t, y, "WHAT I BUILD"))
     y += 38
     for label, desc in WHAT:
@@ -578,8 +575,7 @@ ALT = (
     "it. Abdullah Al Tamimi. The role beneath the name cycles through four: technical "
     "founder and product engineer; founder at LeafleX and Nashrati; AI and automation "
     "and full-stack developer; healthcare, education and government software. Building the layer between "
-    "authoritative data and the person who has to act on it, 9XAI Fellow at Al Hussein "
-    "Technical University in Jordan. What I build: healthcare, GS1 pack verification, "
+    "authoritative data and the person who has to act on it. What I build: healthcare, GS1 pack verification, "
     "MedDRA-coded adverse-event reporting and E2B CIOMS export; education, teacher and "
     "institutional analytics over Moodle without recomputing its grades; government, "
     "citizen-feedback intelligence with classification, personas and root-cause tracing; "
