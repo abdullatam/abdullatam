@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 220" width="1280" height="220" role="img" aria-label="Operating principles: Find the real problem, Build the smallest true thing, Ship to real users, Measure and iterate">
+  <title>How I build: find the real problem, build the smallest true thing, ship it, measure and iterate.</title>
+  <defs>
+    <linearGradient id="pb" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#18D7FF"/><stop offset="45%" stop-color="#008CFF"/>
+      <stop offset="70%" stop-color="#1769FF"/><stop offset="100%" stop-color="#635BFF"/>
+    </linearGradient>
+    <radialGradient id="ph" cx="50%" cy="55%" r="60%">
+      <stop offset="0%" stop-color="#1769FF" stop-opacity=".18"/>
+      <stop offset="100%" stop-color="#050B1A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="pgb" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="16"/></filter>
+    <filter id="pgm" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="6"/></filter>
+    <clipPath id="pc"><rect x="1" y="1" width="1278" height="218" rx="16"/></clipPath>
+  </defs>
+
+  <rect x="1" y="1" width="1278" height="218" rx="16" fill="#050B1A"/>
+  <g clip-path="url(#pc)">
+    <rect width="1280" height="220" fill="url(#ph)"/>
+
+    <g fill="none" stroke-linecap="round">
+      <path d="M-40 118 C 140 118, 200 86, 360 96 S 620 130, 800 108 S 1080 74, 1320 88"
+            stroke="url(#pb)" stroke-width="26" stroke-opacity=".40" filter="url(#pgb)"/>
+      <path d="M-40 118 C 140 118, 200 86, 360 96 S 620 130, 800 108 S 1080 74, 1320 88"
+            stroke="url(#pb)" stroke-width="11" stroke-opacity=".85" filter="url(#pgm)"/>
+      <path d="M-40 118 C 140 118, 200 86, 360 96 S 620 130, 800 108 S 1080 74, 1320 88"
+            stroke="url(#pb)" stroke-width="6"/>
+    </g>
+
+    <!-- nodes sitting on the line -->
+    <g>
+      <circle cx="160" cy="112" r="9" fill="#050B1A" stroke="#18D7FF" stroke-width="3"/>
+      <circle cx="520" cy="113" r="9" fill="#050B1A" stroke="#008CFF" stroke-width="3"/>
+      <circle cx="880" cy="103" r="9" fill="#050B1A" stroke="#1769FF" stroke-width="3"/>
+      <circle cx="1140" cy="86" r="9" fill="#050B1A" stroke="#635BFF" stroke-width="3"/>
+    </g>
+
+    <g font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" text-anchor="middle">
+      <text x="160"  y="62" font-size="20" font-weight="700" letter-spacing="3.4" fill="#F5F7FF">FIND</text>
+      <text x="160"  y="176" font-size="13.5" fill="#94A3B8">the problem people actually have</text>
+
+      <text x="520"  y="62" font-size="20" font-weight="700" letter-spacing="3.4" fill="#F5F7FF">BUILD</text>
+      <text x="520"  y="177" font-size="13.5" fill="#94A3B8">the smallest thing that is true</text>
+
+      <text x="880"  y="52" font-size="20" font-weight="700" letter-spacing="3.4" fill="#F5F7FF">SHIP</text>
+      <text x="880"  y="167" font-size="13.5" fill="#94A3B8">to real users, in their language</text>
+
+      <text x="1140" y="42" font-size="20" font-weight="700" letter-spacing="3.4" fill="#F5F7FF">MEASURE</text>
+      <text x="1140" y="154" font-size="13.5" fill="#94A3B8">then change what the data says</text>
+    </g>
+  </g>
+  <rect x="1" y="1" width="1278" height="218" rx="16" fill="none" stroke="#1E3A5F" stroke-width="1.5"/>
+</svg>

@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" role="img" aria-label="Abdullah Al Tamimi — Technical Founder, Builder, Product Engineer">
+  <title>Abdullah Al Tamimi — Technical Founder · Builder · Product Engineer</title>
+  <defs>
+    <linearGradient id="brand" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#18D7FF"/>
+      <stop offset="45%"  stop-color="#008CFF"/>
+      <stop offset="70%"  stop-color="#1769FF"/>
+      <stop offset="100%" stop-color="#635BFF"/>
+    </linearGradient>
+    <linearGradient id="brandSoft" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#67E8FF" stop-opacity=".9"/>
+      <stop offset="50%"  stop-color="#008CFF" stop-opacity=".7"/>
+      <stop offset="100%" stop-color="#635BFF" stop-opacity=".5"/>
+    </linearGradient>
+    <linearGradient id="rule" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#18D7FF"/>
+      <stop offset="55%"  stop-color="#1769FF"/>
+      <stop offset="100%" stop-color="#635BFF" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="62%" cy="70%" r="55%">
+      <stop offset="0%"   stop-color="#008CFF" stop-opacity=".30"/>
+      <stop offset="55%"  stop-color="#1769FF" stop-opacity=".10"/>
+      <stop offset="100%" stop-color="#050B1A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="halo2" cx="18%" cy="28%" r="42%">
+      <stop offset="0%"   stop-color="#18D7FF" stop-opacity=".16"/>
+      <stop offset="100%" stop-color="#050B1A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glowBig" x="-30%" y="-120%" width="160%" height="340%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <filter id="glowMid" x="-30%" y="-120%" width="160%" height="340%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <clipPath id="card"><rect x="1" y="1" width="1278" height="398" rx="18"/></clipPath>
+  </defs>
+
+  <rect x="1" y="1" width="1278" height="398" rx="18" fill="#050B1A"/>
+
+  <g clip-path="url(#card)">
+    <rect width="1280" height="400" fill="url(#halo)"/>
+    <rect width="1280" height="400" fill="url(#halo2)"/>
+
+    <!-- faint technical grid -->
+    <g stroke="#1E3A5F" stroke-opacity=".30" stroke-width="1">
+      <path d="M160 0V400M320 0V400M480 0V400M640 0V400M800 0V400M960 0V400M1120 0V400"/>
+      <path d="M0 100H1280M0 200H1280M0 300H1280" stroke-opacity=".18"/>
+    </g>
+
+    <!-- signature flowing line: glow bloom, then body, then highlight -->
+    <g fill="none" stroke-linecap="round">
+      <path d="M-60 350 C 180 350, 300 268, 540 258 S 800 340, 980 276 S 1180 120, 1345 150"
+            stroke="url(#brand)" stroke-width="34" stroke-opacity=".45" filter="url(#glowBig)"/>
+      <path d="M-60 350 C 180 350, 300 268, 540 258 S 800 340, 980 276 S 1180 120, 1345 150"
+            stroke="url(#brand)" stroke-width="15" filter="url(#glowMid)" stroke-opacity=".85"/>
+      <path d="M-60 350 C 180 350, 300 268, 540 258 S 800 340, 980 276 S 1180 120, 1345 150"
+            stroke="url(#brand)" stroke-width="8"/>
+      <path d="M-60 342 C 180 342, 300 260, 540 250 S 800 332, 980 268 S 1180 112, 1345 142"
+            stroke="#67E8FF" stroke-width="1.6" stroke-opacity=".55"/>
+      <!-- trailing companion stroke, for depth -->
+      <path d="M-60 384 C 200 384, 320 308, 566 296 S 820 378, 998 314 S 1190 162, 1345 192"
+            stroke="url(#brandSoft)" stroke-width="3" stroke-opacity=".40"/>
+    </g>
+
+    <!-- content -->
+    <g>
+      <rect x="80" y="86" width="62" height="3" rx="1.5" fill="url(#rule)"/>
+      <text x="80" y="152" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="58" font-weight="700" letter-spacing="1.5" fill="#F5F7FF">Abdullah Al Tamimi</text>
+      <text x="82" y="192" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="17.5" font-weight="600" letter-spacing="5.2" fill="#67E8FF">TECHNICAL FOUNDER &#183; BUILDER &#183; PRODUCT ENGINEER</text>
+      <text x="82" y="228" font-family="'Helvetica Neue',Helvetica,Arial,sans-serif" font-size="16" font-weight="400" letter-spacing=".2" fill="#94A3B8">Regulated healthcare, education and government software &#8212; shipped, not slide-decked.</text>
+    </g>
+  </g>
+
+  <rect x="1" y="1" width="1278" height="398" rx="18" fill="none" stroke="#1E3A5F" stroke-width="1.5"/>
+</svg>
