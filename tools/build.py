@@ -130,13 +130,23 @@ WORK_IMAGES = [
         shots=["nashrati-home.png", "nashrati-twin.png"], kind="phones",
     ),
     dict(
-        title="LCMS GATE",
-        desc=["Teacher and institution reporting over a real Moodle — saved",
-              "templates, AND/OR filters, per-question statistics."],
-        stack="FastAPI · React 19 · PHP plugin · PostgreSQL · Docker",
-        shots=["lcms-reports.png"], kind="wide",
+        title="AQABA AQUA AI",
+        desc=["Flash-flood sediment risk to Gulf of Aqaba coral reefs: rainfall",
+              "and terrain to a marine plume to reef exposure, hours ahead."],
+        stack="FastAPI · XGBoost · PostGIS · React · MapLibre · RAG",
+        shots=["aaa-overview.png"], kind="wide",
     ),
 ]
+
+# One project whose screenshot is a wide desktop UI, so it gets the full width
+# rather than being cropped to a column.
+WORK_WIDE = dict(
+    title="LCMS GATE",
+    desc=["Teacher and institution reporting over a real Moodle — saved templates, "
+          "AND/OR filters, per-question statistics."],
+    stack="FastAPI · React 19 · PHP plugin · PostgreSQL · Docker",
+    shot="lcms-reports.png",
+)
 
 WORK_TEXT = [
     dict(
@@ -411,7 +421,26 @@ def build_card(theme):
         o.append(txt(x + col_w / 2, ty2 + 32 + len(item["desc"]) * 24 + 10,
                      item["stack"], size=13, fill=t["dim"], anchor="middle"))
 
-    y += 330 + 40 + 32 + 2 * 24 + 10 + 62
+    y += 330 + 40 + 32 + 2 * 24 + 10 + 58
+
+    # the wide card: one screenshot across the full column width
+    wh = 300
+    o.append(f'<rect x="{PAD}" y="{y}" width="{INNER}" height="{wh}" rx="12" '
+             f'fill="{t["panel"]}" stroke="{t["border"]}" stroke-width="1"/>')
+    o.append(f'<clipPath id="wideclip-{theme}"><rect x="{PAD + 1}" y="{y + 1}" '
+             f'width="{INNER - 2}" height="{wh - 2}" rx="11"/></clipPath>')
+    o.append(f'<image x="{PAD + 1}" y="{y + 1}" width="{INNER - 2}" height="{wh - 2}" '
+             f'preserveAspectRatio="xMidYMin slice" '
+             f'clip-path="url(#wideclip-{theme})" href="{shot(WORK_WIDE["shot"])}"/>')
+    wy = y + wh + 40
+    o.append(txt(W / 2, wy, WORK_WIDE["title"], size=18.5, fill=t["accent"],
+                 weight=700, spacing="3.4", anchor="middle"))
+    for k, line in enumerate(WORK_WIDE["desc"]):
+        o.append(txt(W / 2, wy + 32 + k * 24, line, size=15,
+                     fill=t["text"], anchor="middle"))
+    o.append(txt(W / 2, wy + 32 + len(WORK_WIDE["desc"]) * 24 + 10,
+                 WORK_WIDE["stack"], size=13, fill=t["dim"], anchor="middle"))
+    y = wy + 32 + len(WORK_WIDE["desc"]) * 24 + 10 + 58
 
     for i, item in enumerate(WORK_TEXT):
         x = PAD + i * (col_w + 48)
@@ -695,9 +724,12 @@ ALT = (
     "Redis, Git, GitHub. Selected work in two columns: Nashrati, official drug leaflets "
     "turned into something a patient can act on — scan the pack, verify it, read it against "
     "your own profile — in React 19, Supabase, OpenAI, GS1 DataMatrix and MedDRA, shown as "
-    "two Arabic phone screens. LCMS GATE, teacher and institution reporting over a real "
+    "two Arabic phone screens. AQABA AQUA AI, flash-flood sediment risk to Gulf of Aqaba coral "
+    "reefs — rainfall and terrain to a marine plume to reef exposure, hours ahead — in FastAPI, "
+    "XGBoost, PostGIS, React, MapLibre and RAG, shown as its overview map. Across the full "
+    "width below them, LCMS GATE, teacher and institution reporting over a real "
     "Moodle with saved templates, AND/OR filters and per-question statistics, in FastAPI, "
-    "React 19, a PHP plugin, PostgreSQL and Docker, shown as its reports hub. Terhal, Ma'an "
+    "React 19, a PHP plugin, PostgreSQL and Docker, shown as its reports hub. Then Terhal, Ma'an "
     "governorate beyond Petra: plan a trip and book a local guide at a price you can see up "
     "front, in FastAPI, PostgreSQL, React 18, Leaflet and OpenAI vision. VOC-360, a national "
     "citizen-experience platform that ingests public feedback, classifies it and traces each "
