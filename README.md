@@ -22,9 +22,9 @@
 </p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)"  srcset="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-light.svg">
-  <img src="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-dark.svg" width="100%" alt="A snake crawling the contribution graph and eating the squares, drawn in cyan.">
+  <source media="(prefers-color-scheme: dark)"  srcset="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-dark.svg?v=1">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-light.svg?v=1">
+  <img src="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-dark.svg?v=1" width="100%" alt="A snake crawling the contribution graph and eating the squares, drawn in cyan.">
 </picture>
 
 <details>
