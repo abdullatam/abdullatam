@@ -169,6 +169,10 @@ View severity-report cards. Team platform under the 9XAI program.
 
 ### How the card is drawn
 
+The CV is the `.docx` in `assets/`; `sh tools/cv_pdf.sh` re-renders the PDF beside it, which
+is what the View and Download buttons point at. Run it after every edit to the `.docx`, or the
+buttons hand out an old CV.
+
 `tools/build.py` draws `assets/card-{dark,light}.svg`, the portfolio banner and the link
 buttons from one set of definitions — content at the top of the file, a palette per theme, icons from `tools/icons/`,
 screenshots from `tools/shots/`. Edit the content, run `python3 tools/build.py`, bump the `?v=`
