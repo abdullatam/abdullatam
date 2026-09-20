@@ -169,8 +169,31 @@ REQUEST_NOTE = "the official leaflet stays the authoritative source at every ste
 PLATFORM = [("POSTGRESQL", "relational store"), ("SUPABASE AUTH", "identity"),
             ("OPENAI", "summarisation"), ("I18NEXT", "Arabic / English RTL")]
 
-LINKS = [("linkedin", "LINKEDIN"), ("email", "EMAIL"),
+# The portfolio. The card is one image and an image served through GitHub's
+# proxy cannot carry a link, so the URL is set in mono at a size that reads at a
+# glance; the button row under the card carries the click.
+PORTFOLIO = dict(
+    url="helpful-khapse-79c621.netlify.app",
+    line="Case studies, live screens, and the thinking behind each build.",
+    cta="VISIT",
+)
+PORTFOLIO_URL = "https://helpful-khapse-79c621.netlify.app/"
+
+LINKS = [("portfolio", "PORTFOLIO"), ("linkedin", "LINKEDIN"), ("email", "EMAIL"),
          ("leaflex", "LEAFLEX"), ("build", "HOW IT'S BUILT")]
+
+# The one button that is a destination rather than a contact detail, so it is
+# the only one drawn filled.
+PRIMARY_LINK = "portfolio"
+
+# A globe, as one path: two rings — the sphere and the meridian, each closed
+# against its own reversed inner arc so the middle stays open — and two
+# latitude bars. Used on the card band and on the button, so they match.
+GLOBE = ("M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20zm0 2.2a7.8 7.8 0 1 1 0 15.6"
+         "a7.8 7.8 0 1 1 0-15.6z"
+         "M12 2a4.6 10 0 1 0 0 20a4.6 10 0 1 0 0-20zm0 2.2a2.7 7.8 0 1 1 0 15.6"
+         "a2.7 7.8 0 1 1 0-15.6z"
+         "M3.6 9.2h16.8v1.9H3.6zM3.6 13h16.8v1.9H3.6z")
 
 # ---------------------------------------------------------------- helpers
 
@@ -331,6 +354,54 @@ def arrow(t, x, y, glow=None):
     return "".join(o)
 
 
+def portfolio_band(t, theme, y):
+    """The closing call to action: one wide panel carrying the portfolio URL.
+
+    It is set on the same materials as everything else — the accent border, the
+    icon tile from the stack row, the band of light from the request row — so it
+    reads as part of the card rather than a badge dropped onto it."""
+    h, o = 104, []
+    o.append(f'<rect x="{PAD}" y="{y}" width="{INNER}" height="{h}" rx="16" '
+             f'fill="{t["panel2"]}" stroke="{t["accent"]}" stroke-opacity=".45" '
+             f'stroke-width="1.5"/>')
+    o.append(f'<clipPath id="ctaclip-{theme}"><rect x="{PAD}" y="{y}" '
+             f'width="{INNER}" height="{h}" rx="16"/></clipPath>')
+    o.append(f'<g clip-path="url(#ctaclip-{theme})">'
+             f'<rect class="cta-sweep" x="{PAD - SWEEP_W}" y="{y}" '
+             f'width="{SWEEP_W}" height="{h}" fill="url(#sweep-{theme})"/></g>')
+
+    # the globe, in a tile cut the same way as the stack tiles
+    ts = 56
+    tx, ty = PAD + 24, y + (h - ts) / 2
+    o.append(f'<rect x="{tx}" y="{ty}" width="{ts}" height="{ts}" rx="14" '
+             f'fill="{t["tile"]}" stroke="{t["accent"]}" stroke-opacity=".45" '
+             f'stroke-width="1"/>')
+    k = 30 / 24
+    o.append(f'<g transform="translate({tx + (ts - 30) / 2},{ty + (ts - 30) / 2}) '
+             f'scale({k})"><path d="{GLOBE}" fill="{t["accent"]}"/></g>')
+
+    lx = tx + ts + 26
+    o.append(txt(lx, y + 32, "PORTFOLIO", size=11, fill=t["accent"],
+                 weight=700, spacing="2.4"))
+    o.append(txt(lx, y + 64, PORTFOLIO["url"], size=21, fill=t["text"],
+                 weight=700, family=MONO))
+    o.append(txt(lx, y + 86, PORTFOLIO["line"], size=13.5, fill=t["muted"]))
+
+    # the chip: not a link, but the shape of one, so the eye knows where to go
+    cw, ch = 138, 46
+    cx0, cy0 = W - PAD - 24 - cw, y + (h - ch) / 2
+    o.append(f'<rect x="{cx0}" y="{cy0}" width="{cw}" height="{ch}" rx="11" '
+             f'fill="{t["accent"]}" fill-opacity=".12" stroke="{t["accent"]}" '
+             f'stroke-opacity=".6" stroke-width="1.5"/>')
+    o.append(txt(cx0 + 30, cy0 + ch / 2 + 4.5, PORTFOLIO["cta"], size=12.5,
+                 fill=t["accent"], weight=700, spacing="2.2"))
+    ax, ay = cx0 + cw - 38, cy0 + ch / 2
+    o.append(f'<path d="M{ax} {ay}h15m-6 -6l6 6l-6 6" fill="none" '
+             f'stroke="{t["accent"]}" stroke-width="2" stroke-linecap="round" '
+             f'stroke-linejoin="round"/>')
+    return "".join(o)
+
+
 # ---------------------------------------------------------------- the card
 
 
@@ -452,7 +523,11 @@ def build_card(theme):
         o.append(txt(x + col_w / 2, y + 32 + len(item["desc"]) * 24 + 10,
                      item["stack"], size=13, fill=t["dim"], anchor="middle"))
 
-    y += 32 + 2 * 24 + 10 + 74
+    y += 32 + 2 * 24 + 10 + 44
+
+    # ---- the portfolio: where all of the above lives, in full
+    o.append(portfolio_band(t, theme, y))
+    y += 104 + 76
 
     # ---- how I work: the four principles, sitting on the line
     o.append(section(t, y, "HOW I WORK"))
@@ -666,6 +741,11 @@ def build_card(theme):
 .req-return{{animation:reqDash 1.1s linear infinite}}
 @keyframes reqDash{{from{{stroke-dashoffset:0}}to{{stroke-dashoffset:18}}}}
 .pglow{{animation:svcPulse {REQ_SECONDS * 1.6:g}s ease-in-out infinite}}
+.cta-sweep{{animation:ctaFlow {REQ_SECONDS * 1.4:g}s linear infinite}}
+@keyframes ctaFlow{{
+  0%{{transform:translateX(0)}}
+  100%{{transform:translateX({INNER + SWEEP_W * 2:g}px)}}
+}}
 .cal-sweep{{animation:calFlow {REQ_SECONDS * 2:g}s linear infinite}}
 @keyframes calFlow{{
   0%{{transform:translateX(0)}}
@@ -683,10 +763,10 @@ def build_card(theme):
     # and the diagram has to stay readable with every animation switched off.
     others = ",".join(f".r{i + 1}" for i in range(1, len(ROLES)))
     css.append("@media(prefers-reduced-motion:reduce){"
-               ".role,.shimmer,.req-sweep,.req-back,.cal-sweep,.fglow,.aglow,.pglow,.req-return"
+               ".role,.shimmer,.req-sweep,.req-back,.cta-sweep,.cal-sweep,.fglow,.aglow,.pglow,.req-return"
                "{animation:none}"
                f".r1{{opacity:1}}{others}{{opacity:0}}"
-               ".shimmer,.req-sweep,.req-back,.cal-sweep{display:none}}")
+               ".shimmer,.req-sweep,.req-back,.cta-sweep,.cal-sweep{display:none}}")
     css.append("</style>")
     style = "".join(css)
 
@@ -734,6 +814,9 @@ ALT = (
     "front, in FastAPI, PostgreSQL, React 18, Leaflet and OpenAI vision. VOC-360, a national "
     "citizen-experience platform that ingests public feedback, classifies it and traces each "
     "issue to its root cause, in FastAPI, PostgreSQL, Redis, Docker and pandas. How I work, "
+    "Beneath the work, a wide panel carries the portfolio: a globe, the address "
+    "helpful-khapse-79c621.netlify.app, case studies, live screens and the thinking behind "
+    "each build, and a Visit chip, with a band of light crossing the panel. How I work, "
     "four principles set on the same glowing line: founder mindset, better everyday, ideas to "
     "impact, progress over perfection. Architecture, animated: a band of light crosses the "
     "request row and each step lights as the light reaches it — scan, GS1 DataMatrix, to "
@@ -747,6 +830,7 @@ ALT = (
 # ---------------------------------------------------------------- buttons
 
 BUTTON_ICONS = {
+    "portfolio": GLOBE,
     "linkedin": "M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.3c0-1.26-.02-2.9-1.77-2.9-1.77 0-2.04 1.38-2.04 2.8V21H9z",
     "email": "M2 5.5A1.5 1.5 0 0 1 3.5 4h17A1.5 1.5 0 0 1 22 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 2 18.5zM4.4 6l7.6 5.6L19.6 6zM20 7.9l-7.4 5.45a1 1 0 0 1-1.2 0L4 7.9V18h16z",
     "leaflex": "M12 2 3 6.2v6c0 5 3.8 9.2 9 9.8 5.2-.6 9-4.8 9-9.8v-6zm0 2.2 7 3.3v4.7c0 3.9-2.9 7.2-7 7.8-4.1-.6-7-3.9-7-7.8V7.5zm-1 3.3v4.2l-2.2-2.2-1.4 1.42L12 15.5l4.6-4.6-1.4-1.42L13 11.7V7.5z",
@@ -755,14 +839,30 @@ BUTTON_ICONS = {
 
 
 def build_button(theme, key, label):
+    """One link button. The primary one — the portfolio — is filled and carries a
+    trailing arrow, so the row has a first stop rather than four equal ones."""
     t = THEMES[theme]
     h = 44
-    w = 42 + 9.6 * len(label) + 26
+    primary = key == PRIMARY_LINK
+    w = 42 + 9.6 * len(label) + 26 + (22 if primary else 0)
     ic = t["accent"] if key != "build" else t["muted"]
+    stroke = t["accent"] if primary else t["border"]
+    op = ' stroke-opacity=".65"' if primary else ""
+    # The tint goes over an opaque panel, not straight onto the page: these
+    # buttons sit on whatever background GitHub is serving, and a translucent
+    # fill would read differently on each of them.
+    wash = (f'<rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="10" '
+            f'fill="{t["accent"]}" fill-opacity=".14"/>') if primary else ""
+    tail = ""
+    if primary:
+        ax, ay = w - 34, h / 2
+        tail = (f'\n  <path d="M{ax} {ay}h13m-5 -5l5 5l-5 5" fill="none" '
+                f'stroke="{t["accent"]}" stroke-width="1.9" stroke-linecap="round" '
+                f'stroke-linejoin="round"/>')
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-label="{esc(label)}">
-  <rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="10" fill="{t["panel"]}" stroke="{t["border"]}" stroke-width="1.5"/>
+  <rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="10" fill="{t["panel"]}" stroke="{stroke}"{op} stroke-width="1.5"/>{wash}
   <g transform="translate(16,{(h - 20) / 2}) scale({20 / 24})"><path d="{BUTTON_ICONS[key]}" fill="{ic}"/></g>
-  {txt(42, h / 2 + 4.5, label, size=12.5, fill=t["text"], weight=700, spacing="1.9", family=SANS)}
+  {txt(42, h / 2 + 4.5, label, size=12.5, fill=t["text"], weight=700, spacing="1.9", family=SANS)}{tail}
 </svg>'''
 
 

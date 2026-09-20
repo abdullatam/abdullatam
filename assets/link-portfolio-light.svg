@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 176.39999999999998 44" width="176.39999999999998" height="44" role="img" aria-label="PORTFOLIO">
+  <rect x="0.75" y="0.75" width="174.89999999999998" height="42.5" rx="10" fill="#F4F8FF" stroke="#0A79C7" stroke-opacity=".65" stroke-width="1.5"/><rect x="0.75" y="0.75" width="174.89999999999998" height="42.5" rx="10" fill="#0A79C7" fill-opacity=".14"/>
+  <g transform="translate(16,12.0) scale(0.8333333333333334)"><path d="M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20zm0 2.2a7.8 7.8 0 1 1 0 15.6a7.8 7.8 0 1 1 0-15.6zM12 2a4.6 10 0 1 0 0 20a4.6 10 0 1 0 0-20zm0 2.2a2.7 7.8 0 1 1 0 15.6a2.7 7.8 0 1 1 0-15.6zM3.6 9.2h16.8v1.9H3.6zM3.6 13h16.8v1.9H3.6z" fill="#0A79C7"/></g>
+  <text x="42" y="26.5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="12.5" fill="#08101F" font-weight="700" letter-spacing="1.9">PORTFOLIO</text>
+  <path d="M142.39999999999998 22.0h13m-5 -5l5 5l-5 5" fill="none" stroke="#0A79C7" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
