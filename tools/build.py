@@ -189,6 +189,10 @@ BANNER_WAVE = ("M-40 268 C 220 268, 380 250, 620 236 S 900 214, 1080 150 "
 BANNER_WAVE_LEN = 1452        # measured off the path; drives the shimmer
 BANNER_H = 268
 
+# The CV. Two pills under the banner rather than two more entries in the contact
+# row: one opens the PDF in GitHub's own viewer, one hands over the file.
+CV = [("cv-view", "VIEW CV", False), ("cv-download", "DOWNLOAD CV", True)]
+
 LINKS = [("linkedin", "LINKEDIN"), ("email", "EMAIL"),
          ("leaflex", "LEAFLEX"), ("build", "HOW IT'S BUILT")]
 
@@ -896,6 +900,15 @@ BANNER_ALT = (
 
 # ---------------------------------------------------------------- buttons
 
+CV_ICONS = {
+    # a page with its corner folded over
+    "cv-view": ("M6 2h7.2L19 7.8V22H6zm2 2v16h9V9h-4.4V4zm2.4 8.6h6v1.9h-6zm0 3.6h6v1.9h-6z"
+                "M10.4 9h2.2v1.9h-2.2z"),
+    # the same page, with the arrow leaving it
+    "cv-download": ("M6 2h7.2L19 7.8V13h-2V9h-4.4V4H8v16h4v2H6z"
+                    "M17.2 14.4v4.3l1.5-1.5 1.4 1.4-3.9 3.8-3.9-3.8 1.4-1.4 1.5 1.5v-4.3z"),
+}
+
 BUTTON_ICONS = {
     "linkedin": "M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.3c0-1.26-.02-2.9-1.77-2.9-1.77 0-2.04 1.38-2.04 2.8V21H9z",
     "email": "M2 5.5A1.5 1.5 0 0 1 3.5 4h17A1.5 1.5 0 0 1 22 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 2 18.5zM4.4 6l7.6 5.6L19.6 6zM20 7.9l-7.4 5.45a1 1 0 0 1-1.2 0L4 7.9V18h16z",
@@ -916,6 +929,22 @@ def build_button(theme, key, label):
 </svg>'''
 
 
+def build_cv(theme, key, label, primary):
+    """A CV pill. Same materials as the banner's address field — accent border,
+    accent wash on the one that hands over the file — so the two rows read as
+    one thing rather than as a button row that grew."""
+    t = THEMES[theme]
+    h = 52
+    w = 50 + 10.4 * len(label) + 28
+    wash = (f'<rect x="0.9" y="0.9" width="{w - 1.8}" height="{h - 1.8}" rx="13" '
+            f'fill="{t["accent"]}" fill-opacity=".12"/>') if primary else ""
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-label="{esc(label)}">
+  <rect x="0.9" y="0.9" width="{w - 1.8}" height="{h - 1.8}" rx="13" fill="{t["panel2"]}" stroke="{t["accent"]}" stroke-opacity="{.6 if primary else .38}" stroke-width="1.5"/>{wash}
+  <g transform="translate(20,{(h - 23) / 2}) scale({23 / 24})"><path d="{CV_ICONS[key]}" fill="{t["accent"]}"/></g>
+  {txt(50, h / 2 + 5, label, size=13.5, fill=t["text"], weight=700, spacing="2.2", family=SANS)}
+</svg>'''
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     for theme in THEMES:
@@ -925,10 +954,13 @@ def main():
         p = os.path.join(OUT_DIR, f"portfolio-{theme}.svg")
         open(p, "w", encoding="utf-8").write(build_portfolio(theme))
         print(f"{os.path.basename(p):24} {os.path.getsize(p) / 1024:8.1f} KB")
+        for key, label, primary in CV:
+            q = os.path.join(OUT_DIR, f"{key}-{theme}.svg")
+            open(q, "w", encoding="utf-8").write(build_cv(theme, key, label, primary))
         for key, label in LINKS:
             p = os.path.join(OUT_DIR, f"link-{key}-{theme}.svg")
             open(p, "w", encoding="utf-8").write(build_button(theme, key, label))
-    print(f"{'link buttons':24} {len(LINKS) * 2:8} files")
+    print(f"{'cv + link buttons':24} {(len(LINKS) + len(CV)) * 2:8} files")
 
 
 if __name__ == "__main__":
