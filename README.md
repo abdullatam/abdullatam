@@ -1,8 +1,20 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)"  srcset="assets/card-dark.svg?v=8">
-  <source media="(prefers-color-scheme: light)" srcset="assets/card-light.svg?v=8">
-  <img src="assets/card-dark.svg?v=8" width="100%" alt="A glowing cyan-to-blue line flows across the top of the card, the same line that runs through the profile picture, with a bright point of light travelling along it. Abdullah Al Tamimi. The role beneath the name cycles through four: technical founder and product engineer; founder at LeafleX and Nashrati; AI and automation and full-stack developer; healthcare, education and government software. Building the layer between authoritative data and the person who has to act on it. What I build: healthcare, GS1 pack verification, MedDRA-coded adverse-event reporting and E2B/CIOMS export; education, teacher and institutional analytics over Moodle without recomputing its grades; government, citizen-feedback intelligence with classification, personas and root-cause tracing; interface, Arabic-first and right-to-left by default, down to the relational model underneath. Stack, interface: TypeScript, React, Vite, Tailwind, Framer Motion, i18next, Leaflet, JavaScript. Systems: Python, FastAPI, Node.js, PHP, PostgreSQL, Supabase, Docker, Kubernetes. AI and data: Claude, LangChain, Ollama, YOLO, MongoDB, Redis, Git, GitHub. Selected work in two columns: Nashrati, official drug leaflets turned into something a patient can act on — scan the pack, verify it, read it against your own profile — in React 19, Supabase, OpenAI, GS1 DataMatrix and MedDRA, shown as two Arabic phone screens. AQABA AQUA AI, flash-flood sediment risk to Gulf of Aqaba coral reefs — rainfall and terrain to a marine plume to reef exposure, hours ahead — in FastAPI, XGBoost, PostGIS, React, MapLibre and RAG, shown as its overview map. Across the full width below them, LCMS GATE, teacher and institution reporting over a real Moodle with saved templates, AND/OR filters and per-question statistics, in FastAPI, React 19, a PHP plugin, PostgreSQL and Docker, shown as its reports hub. Then Terhal, Ma'an governorate beyond Petra: plan a trip and book a local guide at a price you can see up front, in FastAPI, PostgreSQL, React 18, Leaflet and OpenAI vision. VOC-360, a national citizen-experience platform that ingests public feedback, classifies it and traces each issue to its root cause, in FastAPI, PostgreSQL, Redis, Docker and pandas. Beneath the work, a wide panel carries the portfolio: a globe, the address helpful-khapse-79c621.netlify.app, case studies, live screens and the thinking behind each build, and a Visit chip. How I work, four principles set on the same glowing line: founder mindset, better everyday, ideas to impact, progress over perfection. Architecture, animated: a band of light crosses the request row and each step lights as the light reaches it — scan, GS1 DataMatrix, to profile, Supabase row-level security, to smart view, OpenAI, to report, MedDRA to E2B — then a pulse returns along the dashed path beneath, where the official leaflet stays the authoritative source at every step; the platform beneath is PostgreSQL, Supabase Auth, OpenAI and i18next for Arabic and English right-to-left. Last, this year: the contribution calendar GitHub publishes, redrawn in the card's colours, with the year's contribution count, active days and longest streak beside it.">
+  <source media="(prefers-color-scheme: dark)"  srcset="assets/card-dark.svg?v=9">
+  <source media="(prefers-color-scheme: light)" srcset="assets/card-light.svg?v=9">
+  <img src="assets/card-dark.svg?v=9" width="100%" alt="A glowing cyan-to-blue line flows across the top of the card, the same line that runs through the profile picture, with a bright point of light travelling along it. Abdullah Al Tamimi. The role beneath the name cycles through four: technical founder and product engineer; founder at LeafleX and Nashrati; AI and automation and full-stack developer; healthcare, education and government software. Building the layer between authoritative data and the person who has to act on it. What I build: healthcare, GS1 pack verification, MedDRA-coded adverse-event reporting and E2B CIOMS export; education, teacher and institutional analytics over Moodle without recomputing its grades; government, citizen-feedback intelligence with classification, personas and root-cause tracing; interface, Arabic-first and right-to-left by default, down to the relational model underneath. Stack, interface: TypeScript, React, Vite, Tailwind, Framer Motion, i18next, Leaflet, JavaScript. Systems: Python, FastAPI, Node.js, PHP, PostgreSQL, Supabase, Docker, Kubernetes. AI and data: Claude, LangChain, Ollama, YOLO, MongoDB, Redis, Git, GitHub. Selected work in two columns: Nashrati, official drug leaflets turned into something a patient can act on — scan the pack, verify it, read it against your own profile — in React 19, Supabase, OpenAI, GS1 DataMatrix and MedDRA, shown as two Arabic phone screens. AQABA AQUA AI, flash-flood sediment risk to Gulf of Aqaba coral reefs — rainfall and terrain to a marine plume to reef exposure, hours ahead — in FastAPI, XGBoost, PostGIS, React, MapLibre and RAG, shown as its overview map. Across the full width below them, LCMS GATE, teacher and institution reporting over a real Moodle with saved templates, AND/OR filters and per-question statistics, in FastAPI, React 19, a PHP plugin, PostgreSQL and Docker, shown as its reports hub. Then Terhal, Ma'an governorate beyond Petra: plan a trip and book a local guide at a price you can see up front, in FastAPI, PostgreSQL, React 18, Leaflet and OpenAI vision. VOC-360, a national citizen-experience platform that ingests public feedback, classifies it and traces each issue to its root cause, in FastAPI, PostgreSQL, Redis, Docker and pandas. How I work, four principles set on the same glowing line: founder mindset, better everyday, ideas to impact, progress over perfection. Architecture, animated: a band of light crosses the request row and each step lights as the light reaches it — scan, GS1 DataMatrix, to profile, Supabase row-level security, to smart view, OpenAI, to report, MedDRA to E2B — then a pulse returns along the dashed path beneath, where the official leaflet stays the authoritative source at every step; the platform beneath is PostgreSQL as the relational store, Supabase Auth for identity, OpenAI for summarisation, and i18next for Arabic and English right-to-left. This year: the contribution calendar GitHub publishes, drawn in the card's colours — 124 contributions, 22 active days, and a longest streak of 7 days.">
 </picture>
+
+<!-- The portfolio is a destination rather than a contact detail, so it gets the
+     card's full width instead of a button: one image, wrapped in one <a>, which
+     makes the entire banner the click target. -->
+
+<a href="https://helpful-khapse-79c621.netlify.app/" title="Portfolio — selected work, in full">
+  <picture>
+    <source media="(prefers-color-scheme: dark)"  srcset="assets/portfolio-dark.svg?v=9">
+    <source media="(prefers-color-scheme: light)" srcset="assets/portfolio-light.svg?v=9">
+    <img src="assets/portfolio-dark.svg?v=9" width="100%" alt="Portfolio. Selected work, in full: case studies, live screens, and the thinking behind each build, at helpful-khapse-79c621.netlify.app. The glowing cyan-to-blue line from the card runs along the bottom of the banner, and three screens are fanned out on the right — the AQABA AQUA AI overview map, the LCMS GATE reports hub, and Nashrati's Arabic home screen. The whole banner is a link.">
+  </picture>
+</a>
 
 <!-- ?v= on every asset URL busts GitHub's camo proxy. Camo keys its cache on the
      image URL rather than on the bytes behind it, so an edited file keeps serving
@@ -15,11 +27,10 @@
      from the card's own materials by tools/build.py, each wrapped in an <a>. -->
 
 <p align="center">
-  <a href="https://helpful-khapse-79c621.netlify.app/" title="Portfolio — case studies, live screens and the thinking behind each build"><picture><source media="(prefers-color-scheme: light)" srcset="assets/link-portfolio-light.svg?v=8"><img height="44" src="assets/link-portfolio-dark.svg?v=8" alt="Portfolio"></picture></a>
-  <a href="https://www.linkedin.com/in/abdulla-tamimi" title="Abdullah Al Tamimi on LinkedIn"><picture><source media="(prefers-color-scheme: light)" srcset="assets/link-linkedin-light.svg?v=8"><img height="44" src="assets/link-linkedin-dark.svg?v=8" alt="LinkedIn"></picture></a>
-  <a href="mailto:tamimiabdulla418@gmail.com" title="tamimiabdulla418@gmail.com"><picture><source media="(prefers-color-scheme: light)" srcset="assets/link-email-light.svg?v=8"><img height="44" src="assets/link-email-dark.svg?v=8" alt="Email"></picture></a>
-  <a href="https://www.linkedin.com/company/leaflexx" title="LeafleX"><picture><source media="(prefers-color-scheme: light)" srcset="assets/link-leaflex-light.svg?v=8"><img height="44" src="assets/link-leaflex-dark.svg?v=8" alt="LeafleX"></picture></a>
-  <a href="https://github.com/abdullatam/abdullatam" title="abdullatam/abdullatam, the repository that draws this card"><picture><source media="(prefers-color-scheme: light)" srcset="assets/link-build-light.svg?v=8"><img height="44" src="assets/link-build-dark.svg?v=8" alt="How it's built"></picture></a>
+  <a href="https://www.linkedin.com/in/abdulla-tamimi" title="Abdullah Al Tamimi on LinkedIn"><picture><source media="(prefers-color-scheme: light)" srcset="assets/link-linkedin-light.svg?v=9"><img height="44" src="assets/link-linkedin-dark.svg?v=9" alt="LinkedIn"></picture></a>
+  <a href="mailto:tamimiabdulla418@gmail.com" title="tamimiabdulla418@gmail.com"><picture><source media="(prefers-color-scheme: light)" srcset="assets/link-email-light.svg?v=9"><img height="44" src="assets/link-email-dark.svg?v=9" alt="Email"></picture></a>
+  <a href="https://www.linkedin.com/company/leaflexx" title="LeafleX"><picture><source media="(prefers-color-scheme: light)" srcset="assets/link-leaflex-light.svg?v=9"><img height="44" src="assets/link-leaflex-dark.svg?v=9" alt="LeafleX"></picture></a>
+  <a href="https://github.com/abdullatam/abdullatam" title="abdullatam/abdullatam, the repository that draws this card"><picture><source media="(prefers-color-scheme: light)" srcset="assets/link-build-light.svg?v=9"><img height="44" src="assets/link-build-dark.svg?v=9" alt="How it's built"></picture></a>
 </p>
 
 <p align="center">
@@ -27,9 +38,9 @@
 </p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)"  srcset="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-dark.svg?v=8">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-light.svg?v=8">
-  <img src="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-dark.svg?v=8" width="100%" alt="A snake crawling the contribution graph and eating the squares, drawn in cyan.">
+  <source media="(prefers-color-scheme: dark)"  srcset="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-dark.svg?v=9">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-light.svg?v=9">
+  <img src="https://raw.githubusercontent.com/abdullatam/abdullatam/output/snake-dark.svg?v=9" width="100%" alt="A snake crawling the contribution graph and eating the squares, drawn in cyan.">
 </picture>
 
 <details>
@@ -149,8 +160,8 @@ View severity-report cards. Team platform under the 9XAI program.
 
 ### How the card is drawn
 
-`tools/build.py` draws `assets/card-{dark,light}.svg` and the link buttons from one set of
-definitions — content at the top of the file, a palette per theme, icons from `tools/icons/`,
+`tools/build.py` draws `assets/card-{dark,light}.svg`, the portfolio banner and the link
+buttons from one set of definitions — content at the top of the file, a palette per theme, icons from `tools/icons/`,
 screenshots from `tools/shots/`. Edit the content, run `python3 tools/build.py`, bump the `?v=`
 in this README so camo refetches, and push.
 

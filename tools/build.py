@@ -169,22 +169,28 @@ REQUEST_NOTE = "the official leaflet stays the authoritative source at every ste
 PLATFORM = [("POSTGRESQL", "relational store"), ("SUPABASE AUTH", "identity"),
             ("OPENAI", "summarisation"), ("I18NEXT", "Arabic / English RTL")]
 
-# The portfolio. The card is one image and an image served through GitHub's
-# proxy cannot carry a link, so the URL is set in mono at a size that reads at a
-# glance; the button row under the card carries the click.
+# The portfolio: its own banner under the card, at the card's full width. It is
+# a destination rather than a contact detail, so it is not in the button row —
+# the whole banner is wrapped in one <a> in the README and the entire thing is
+# the click target.
 PORTFOLIO = dict(
-    url="helpful-khapse-79c621.netlify.app",
+    label="PORTFOLIO",
+    head="Selected work, in full",
     line="Case studies, live screens, and the thinking behind each build.",
-    cta="VISIT",
+    url="helpful-khapse-79c621.netlify.app",
+    shots=["aaa-overview.png", "lcms-reports.png", "nashrati-home.png"],
 )
 PORTFOLIO_URL = "https://helpful-khapse-79c621.netlify.app/"
 
-LINKS = [("portfolio", "PORTFOLIO"), ("linkedin", "LINKEDIN"), ("email", "EMAIL"),
-         ("leaflex", "LEAFLEX"), ("build", "HOW IT'S BUILT")]
+# Low and rising, so it passes under the text on the left and behind the
+# screens on the right rather than through either.
+BANNER_WAVE = ("M-40 268 C 220 268, 380 250, 620 236 S 900 214, 1080 150 "
+               "S 1240 96, 1340 104")
+BANNER_WAVE_LEN = 1452        # measured off the path; drives the shimmer
+BANNER_H = 268
 
-# The one button that is a destination rather than a contact detail, so it is
-# the only one drawn filled.
-PRIMARY_LINK = "portfolio"
+LINKS = [("linkedin", "LINKEDIN"), ("email", "EMAIL"),
+         ("leaflex", "LEAFLEX"), ("build", "HOW IT'S BUILT")]
 
 # A globe, as one path: two rings — the sphere and the meridian, each closed
 # against its own reversed inner arc so the middle stays open — and two
@@ -249,16 +255,22 @@ def load_calendar():
 CALENDAR = load_calendar()
 
 
-def shot(name):
-    """Base64 the screenshot once, reuse it across both themes."""
-    if name not in _SHOT_CACHE:
+def shot(name, width=None):
+    """Base64 the screenshot once, reuse it across both themes. `width` scales
+    it down first — the banner draws its screens small, and embedding those at
+    full resolution costs more than the picture is worth."""
+    key = (name, width)
+    if key not in _SHOT_CACHE:
         from PIL import Image
         im = Image.open(os.path.join(SHOTS_DIR, name)).convert("RGB")
+        if width and im.width > width:
+            im = im.resize((width, round(im.height * width / im.width)),
+                           Image.LANCZOS)
         buf = io.BytesIO()
         im.save(buf, "JPEG", quality=82, optimize=True, progressive=True)
-        _SHOT_CACHE[name] = ("data:image/jpeg;base64,"
-                             + base64.b64encode(buf.getvalue()).decode())
-    return _SHOT_CACHE[name]
+        _SHOT_CACHE[key] = ("data:image/jpeg;base64,"
+                            + base64.b64encode(buf.getvalue()).decode())
+    return _SHOT_CACHE[key]
 
 
 def txt(x, y, s, size=15, fill="#fff", weight=400, family=SANS,
@@ -354,52 +366,33 @@ def arrow(t, x, y, glow=None):
     return "".join(o)
 
 
-def portfolio_band(t, theme, y):
-    """The closing call to action: one wide panel carrying the portfolio URL.
-
-    It is set on the same materials as everything else — the accent border, the
-    icon tile from the stack row, the band of light from the request row — so it
-    reads as part of the card rather than a badge dropped onto it."""
-    h, o = 104, []
-    o.append(f'<rect x="{PAD}" y="{y}" width="{INNER}" height="{h}" rx="16" '
-             f'fill="{t["panel2"]}" stroke="{t["accent"]}" stroke-opacity=".45" '
-             f'stroke-width="1.5"/>')
-    o.append(f'<clipPath id="ctaclip-{theme}"><rect x="{PAD}" y="{y}" '
-             f'width="{INNER}" height="{h}" rx="16"/></clipPath>')
-    o.append(f'<g clip-path="url(#ctaclip-{theme})">'
-             f'<rect class="cta-sweep" x="{PAD - SWEEP_W}" y="{y}" '
-             f'width="{SWEEP_W}" height="{h}" fill="url(#sweep-{theme})"/></g>')
-
-    # the globe, in a tile cut the same way as the stack tiles
-    ts = 56
-    tx, ty = PAD + 24, y + (h - ts) / 2
-    o.append(f'<rect x="{tx}" y="{ty}" width="{ts}" height="{ts}" rx="14" '
-             f'fill="{t["tile"]}" stroke="{t["accent"]}" stroke-opacity=".45" '
-             f'stroke-width="1"/>')
-    k = 30 / 24
-    o.append(f'<g transform="translate({tx + (ts - 30) / 2},{ty + (ts - 30) / 2}) '
-             f'scale({k})"><path d="{GLOBE}" fill="{t["accent"]}"/></g>')
-
-    lx = tx + ts + 26
-    o.append(txt(lx, y + 32, "PORTFOLIO", size=11, fill=t["accent"],
-                 weight=700, spacing="2.4"))
-    o.append(txt(lx, y + 64, PORTFOLIO["url"], size=21, fill=t["text"],
-                 weight=700, family=MONO))
-    o.append(txt(lx, y + 86, PORTFOLIO["line"], size=13.5, fill=t["muted"]))
-
-    # the chip: not a link, but the shape of one, so the eye knows where to go
-    cw, ch = 138, 46
-    cx0, cy0 = W - PAD - 24 - cw, y + (h - ch) / 2
-    o.append(f'<rect x="{cx0}" y="{cy0}" width="{cw}" height="{ch}" rx="11" '
-             f'fill="{t["accent"]}" fill-opacity=".12" stroke="{t["accent"]}" '
-             f'stroke-opacity=".6" stroke-width="1.5"/>')
-    o.append(txt(cx0 + 30, cy0 + ch / 2 + 4.5, PORTFOLIO["cta"], size=12.5,
-                 fill=t["accent"], weight=700, spacing="2.2"))
-    ax, ay = cx0 + cw - 38, cy0 + ch / 2
-    o.append(f'<path d="M{ax} {ay}h15m-6 -6l6 6l-6 6" fill="none" '
-             f'stroke="{t["accent"]}" stroke-width="2" stroke-linecap="round" '
-             f'stroke-linejoin="round"/>')
-    return "".join(o)
+def light(theme):
+    """The gradients and filters that make the line read as lit. Both the
+    card and the banner are drawn with them, so they match."""
+    t = THEMES[theme]
+    return f'''
+    <linearGradient id="accent-{theme}" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="{t["accent"]}"/>
+      <stop offset="55%" stop-color="{t["accent2"]}"/>
+      <stop offset="100%" stop-color="{t["accent4"]}"/>
+    </linearGradient>
+    <radialGradient id="halo-{theme}" cx="66%" cy="6%" r="58%">
+      <stop offset="0%" stop-color="{t["accent2"]}" stop-opacity="{t["halo"]}"/>
+      <stop offset="100%" stop-color="{t["bg"]}" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sweep-{theme}" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="{t["accent"]}" stop-opacity="0"/>
+      <stop offset="50%" stop-color="{t["accent"]}" stop-opacity=".20"/>
+      <stop offset="82%" stop-color="{t["hi"]}" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="{t["hi"]}" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="bloom-{theme}" x="-20%" y="-400%" width="140%" height="900%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <filter id="soft-{theme}" x="-20%" y="-400%" width="140%" height="900%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+'''
 
 
 # ---------------------------------------------------------------- the card
@@ -523,11 +516,7 @@ def build_card(theme):
         o.append(txt(x + col_w / 2, y + 32 + len(item["desc"]) * 24 + 10,
                      item["stack"], size=13, fill=t["dim"], anchor="middle"))
 
-    y += 32 + 2 * 24 + 10 + 44
-
-    # ---- the portfolio: where all of the above lives, in full
-    o.append(portfolio_band(t, theme, y))
-    y += 104 + 76
+    y += 32 + 2 * 24 + 10 + 74
 
     # ---- how I work: the four principles, sitting on the line
     o.append(section(t, y, "HOW I WORK"))
@@ -671,29 +660,7 @@ def build_card(theme):
 
     height = y + 52
 
-    defs = f'''<defs>
-    <linearGradient id="accent-{theme}" x1="0%" y1="100%" x2="0%" y2="0%">
-      <stop offset="0%" stop-color="{t["accent"]}"/>
-      <stop offset="55%" stop-color="{t["accent2"]}"/>
-      <stop offset="100%" stop-color="{t["accent4"]}"/>
-    </linearGradient>
-    <radialGradient id="halo-{theme}" cx="66%" cy="6%" r="58%">
-      <stop offset="0%" stop-color="{t["accent2"]}" stop-opacity="{t["halo"]}"/>
-      <stop offset="100%" stop-color="{t["bg"]}" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="sweep-{theme}" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="{t["accent"]}" stop-opacity="0"/>
-      <stop offset="50%" stop-color="{t["accent"]}" stop-opacity=".20"/>
-      <stop offset="82%" stop-color="{t["hi"]}" stop-opacity=".55"/>
-      <stop offset="100%" stop-color="{t["hi"]}" stop-opacity="0"/>
-    </linearGradient>
-    <filter id="bloom-{theme}" x="-20%" y="-400%" width="140%" height="900%">
-      <feGaussianBlur stdDeviation="22"/>
-    </filter>
-    <filter id="soft-{theme}" x="-20%" y="-400%" width="140%" height="900%">
-      <feGaussianBlur stdDeviation="8"/>
-    </filter>
-    <clipPath id="card-{theme}"><rect x="1" y="1" width="{W - 2}" height="{height - 2}" rx="20"/></clipPath>
+    defs = f'''<defs>{light(theme)}    <clipPath id="card-{theme}"><rect x="1" y="1" width="{W - 2}" height="{height - 2}" rx="20"/></clipPath>
   </defs>'''
 
     cycle = ROLE_SECONDS * len(ROLES)
@@ -741,11 +708,6 @@ def build_card(theme):
 .req-return{{animation:reqDash 1.1s linear infinite}}
 @keyframes reqDash{{from{{stroke-dashoffset:0}}to{{stroke-dashoffset:18}}}}
 .pglow{{animation:svcPulse {REQ_SECONDS * 1.6:g}s ease-in-out infinite}}
-.cta-sweep{{animation:ctaFlow {REQ_SECONDS * 1.4:g}s linear infinite}}
-@keyframes ctaFlow{{
-  0%{{transform:translateX(0)}}
-  100%{{transform:translateX({INNER + SWEEP_W * 2:g}px)}}
-}}
 .cal-sweep{{animation:calFlow {REQ_SECONDS * 2:g}s linear infinite}}
 @keyframes calFlow{{
   0%{{transform:translateX(0)}}
@@ -763,10 +725,10 @@ def build_card(theme):
     # and the diagram has to stay readable with every animation switched off.
     others = ",".join(f".r{i + 1}" for i in range(1, len(ROLES)))
     css.append("@media(prefers-reduced-motion:reduce){"
-               ".role,.shimmer,.req-sweep,.req-back,.cta-sweep,.cal-sweep,.fglow,.aglow,.pglow,.req-return"
+               ".role,.shimmer,.req-sweep,.req-back,.cal-sweep,.fglow,.aglow,.pglow,.req-return"
                "{animation:none}"
                f".r1{{opacity:1}}{others}{{opacity:0}}"
-               ".shimmer,.req-sweep,.req-back,.cta-sweep,.cal-sweep{display:none}}")
+               ".shimmer,.req-sweep,.req-back,.cal-sweep{display:none}}")
     css.append("</style>")
     style = "".join(css)
 
@@ -814,9 +776,6 @@ ALT = (
     "front, in FastAPI, PostgreSQL, React 18, Leaflet and OpenAI vision. VOC-360, a national "
     "citizen-experience platform that ingests public feedback, classifies it and traces each "
     "issue to its root cause, in FastAPI, PostgreSQL, Redis, Docker and pandas. How I work, "
-    "Beneath the work, a wide panel carries the portfolio: a globe, the address "
-    "helpful-khapse-79c621.netlify.app, case studies, live screens and the thinking behind "
-    "each build, and a Visit chip, with a band of light crossing the panel. How I work, "
     "four principles set on the same glowing line: founder mindset, better everyday, ideas to "
     "impact, progress over perfection. Architecture, animated: a band of light crosses the "
     "request row and each step lights as the light reaches it — scan, GS1 DataMatrix, to "
@@ -827,10 +786,117 @@ ALT = (
     "English right-to-left."
 )
 
+# ---------------------------------------------------------------- the banner
+
+
+def build_portfolio(theme):
+    """The portfolio banner: one wide, clickable panel under the card.
+
+    The card is a single image and an image served through GitHub's proxy cannot
+    carry a link — so this is a separate image, wrapped in one <a> in the README,
+    which makes the whole banner the click target. It is drawn on the card's own
+    materials: the signature line, the icon tile, the band of light."""
+    t = THEMES[theme]
+    H = BANNER_H
+    o = []
+
+    # the line, low and rising, passing under the words and behind the screens
+    o.append(wave(theme, BANNER_WAVE, widths=(30, 13, 7), shimmer=True))
+
+    # ---- left: the address and what is at it
+    x = PAD
+    o.append(f'<g transform="translate({x},{52}) scale({19 / 24})">'
+             f'<path d="{GLOBE}" fill="{t["accent"]}"/></g>')
+    o.append(txt(x + 30, 68, PORTFOLIO["label"], size=12.5, fill=t["accent"],
+                 weight=700, spacing="3.6"))
+    o.append(txt(x, 122, PORTFOLIO["head"], size=38, fill=t["text"],
+                 weight=800, spacing="0.4"))
+    o.append(txt(x, 156, PORTFOLIO["line"], size=15.5, fill=t["muted"]))
+
+    # the address, set as the thing you click
+    pw, ph, py = 516, 54, 184
+    o.append(f'<rect x="{x}" y="{py}" width="{pw}" height="{ph}" rx="13" '
+             f'fill="{t["accent"]}" fill-opacity=".10" stroke="{t["accent"]}" '
+             f'stroke-opacity=".55" stroke-width="1.5"/>')
+    o.append(txt(x + 24, py + ph / 2 + 7, PORTFOLIO["url"], size=19,
+                 fill=t["text"], weight=700, family=MONO))
+    ax, ay = x + pw - 46, py + ph / 2
+    o.append(f'<g class="go"><path d="M{ax} {ay}h17m-7 -7l7 7l-7 7" fill="none" '
+             f'stroke="{t["accent"]}" stroke-width="2.2" stroke-linecap="round" '
+             f'stroke-linejoin="round"/></g>')
+
+    # ---- right: three screens, fanned, as a glimpse of what is behind the link
+    o.append(f'<ellipse cx="975" cy="134" rx="230" ry="96" fill="{t["accent"]}" '
+             f'opacity=".22" filter="url(#bloom-{theme})"/>')
+    cw, ch = 220, 148
+    for i, (name, rot) in enumerate(zip(PORTFOLIO["shots"], (-7, -1.5, 4))):
+        cx0 = 704 + i * 146
+        cy0 = 134 - ch / 2 + (6 if i == 1 else 0)
+        o.append(f'<g transform="rotate({rot} {cx0 + cw / 2} {cy0 + ch / 2})">')
+        o.append(f'<clipPath id="pc-{theme}-{i}"><rect x="{cx0}" y="{cy0}" '
+                 f'width="{cw}" height="{ch}" rx="10"/></clipPath>')
+        o.append(f'<g clip-path="url(#pc-{theme}-{i})">')
+        o.append(f'<rect x="{cx0}" y="{cy0}" width="{cw}" height="{ch}" '
+                 f'fill="{t["panel"]}"/>')
+        o.append(f'<image x="{cx0}" y="{cy0 + 20}" width="{cw}" height="{ch - 20}" '
+                 f'preserveAspectRatio="xMidYMin slice" href="{shot(name, 480)}"/>')
+        # the window bar, so each one reads as a screen rather than a crop
+        o.append(f'<rect x="{cx0}" y="{cy0}" width="{cw}" height="20" '
+                 f'fill="{t["panel2"]}"/>')
+        for d in range(3):
+            o.append(f'<circle cx="{cx0 + 13 + d * 11}" cy="{cy0 + 10}" r="2.6" '
+                     f'fill="{t["border"]}"/>')
+        # These are screenshots of light interfaces; a wash of the card's own
+        # background seats them on it instead of leaving three white rectangles
+        # burning a hole in the banner.
+        o.append(f'<rect x="{cx0}" y="{cy0}" width="{cw}" height="{ch}" '
+                 f'fill="{t["bg"]}" opacity="{.16 if theme == "dark" else .05}"/>')
+        o.append('</g>')
+        o.append(f'<rect x="{cx0}" y="{cy0}" width="{cw}" height="{ch}" rx="10" '
+                 f'fill="none" stroke="{t["border"]}" stroke-width="1.2"/>')
+        o.append('</g>')
+
+    # the band of light, the same one that crosses the request row on the card
+    o.append(f'<rect class="ban-sweep" x="{-SWEEP_W}" y="0" width="{SWEEP_W}" '
+             f'height="{H}" fill="url(#sweep-{theme})"/>')
+
+    css = (f'<style>.shimmer{{stroke-dasharray:190 {BANNER_WAVE_LEN};'
+           f'animation:banShim 9s linear infinite}}'
+           f'@keyframes banShim{{from{{stroke-dashoffset:{BANNER_WAVE_LEN + 190}}}'
+           f'to{{stroke-dashoffset:0}}}}'
+           f'.ban-sweep{{animation:banFlow 9s linear infinite}}'
+           f'@keyframes banFlow{{0%{{transform:translateX(0)}}'
+           f'100%{{transform:translateX({W + SWEEP_W * 2:g}px)}}}}'
+           f'.go{{animation:banGo 2.6s ease-in-out infinite}}'
+           f'@keyframes banGo{{0%,100%{{transform:translateX(0)}}'
+           f'50%{{transform:translateX(7px)}}}}'
+           f'@media(prefers-reduced-motion:reduce){{.go{{animation:none}}'
+           f'.shimmer,.ban-sweep{{display:none}}}}</style>')
+
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="{esc(BANNER_ALT)}">
+  <title>Portfolio — {esc(PORTFOLIO["url"])}</title>
+  <defs>{light(theme)}
+    <clipPath id="ban-{theme}"><rect x="1" y="1" width="{W - 2}" height="{H - 2}" rx="20"/></clipPath>
+  </defs>
+  {css}
+  <rect x="1" y="1" width="{W - 2}" height="{H - 2}" rx="20" fill="{t["bg"]}"/>
+  <g clip-path="url(#ban-{theme})"><rect width="{W}" height="{H}" fill="url(#halo-{theme})"/>{"".join(o)}</g>
+  <rect x="1" y="1" width="{W - 2}" height="{H - 2}" rx="20" fill="none" stroke="{t["accent"]}" stroke-opacity=".45" stroke-width="1.5"/>
+</svg>'''
+
+
+BANNER_ALT = (
+    "Portfolio. Selected work, in full: case studies, live screens, and the thinking "
+    "behind each build, at helpful-khapse-79c621.netlify.app. The glowing cyan-to-blue "
+    "line from the card runs along the bottom of the banner, and three screens are "
+    "fanned out on the right — the AQABA AQUA AI overview map, the LCMS GATE reports "
+    "hub, and Nashrati's Arabic home screen. The whole banner is a link."
+)
+
+
 # ---------------------------------------------------------------- buttons
 
 BUTTON_ICONS = {
-    "portfolio": GLOBE,
     "linkedin": "M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.3c0-1.26-.02-2.9-1.77-2.9-1.77 0-2.04 1.38-2.04 2.8V21H9z",
     "email": "M2 5.5A1.5 1.5 0 0 1 3.5 4h17A1.5 1.5 0 0 1 22 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 2 18.5zM4.4 6l7.6 5.6L19.6 6zM20 7.9l-7.4 5.45a1 1 0 0 1-1.2 0L4 7.9V18h16z",
     "leaflex": "M12 2 3 6.2v6c0 5 3.8 9.2 9 9.8 5.2-.6 9-4.8 9-9.8v-6zm0 2.2 7 3.3v4.7c0 3.9-2.9 7.2-7 7.8-4.1-.6-7-3.9-7-7.8V7.5zm-1 3.3v4.2l-2.2-2.2-1.4 1.42L12 15.5l4.6-4.6-1.4-1.42L13 11.7V7.5z",
@@ -839,30 +905,14 @@ BUTTON_ICONS = {
 
 
 def build_button(theme, key, label):
-    """One link button. The primary one — the portfolio — is filled and carries a
-    trailing arrow, so the row has a first stop rather than four equal ones."""
     t = THEMES[theme]
     h = 44
-    primary = key == PRIMARY_LINK
-    w = 42 + 9.6 * len(label) + 26 + (22 if primary else 0)
+    w = 42 + 9.6 * len(label) + 26
     ic = t["accent"] if key != "build" else t["muted"]
-    stroke = t["accent"] if primary else t["border"]
-    op = ' stroke-opacity=".65"' if primary else ""
-    # The tint goes over an opaque panel, not straight onto the page: these
-    # buttons sit on whatever background GitHub is serving, and a translucent
-    # fill would read differently on each of them.
-    wash = (f'<rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="10" '
-            f'fill="{t["accent"]}" fill-opacity=".14"/>') if primary else ""
-    tail = ""
-    if primary:
-        ax, ay = w - 34, h / 2
-        tail = (f'\n  <path d="M{ax} {ay}h13m-5 -5l5 5l-5 5" fill="none" '
-                f'stroke="{t["accent"]}" stroke-width="1.9" stroke-linecap="round" '
-                f'stroke-linejoin="round"/>')
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-label="{esc(label)}">
-  <rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="10" fill="{t["panel"]}" stroke="{stroke}"{op} stroke-width="1.5"/>{wash}
+  <rect x="0.75" y="0.75" width="{w - 1.5}" height="{h - 1.5}" rx="10" fill="{t["panel"]}" stroke="{t["border"]}" stroke-width="1.5"/>
   <g transform="translate(16,{(h - 20) / 2}) scale({20 / 24})"><path d="{BUTTON_ICONS[key]}" fill="{ic}"/></g>
-  {txt(42, h / 2 + 4.5, label, size=12.5, fill=t["text"], weight=700, spacing="1.9", family=SANS)}{tail}
+  {txt(42, h / 2 + 4.5, label, size=12.5, fill=t["text"], weight=700, spacing="1.9", family=SANS)}
 </svg>'''
 
 
@@ -871,6 +921,9 @@ def main():
     for theme in THEMES:
         p = os.path.join(OUT_DIR, f"card-{theme}.svg")
         open(p, "w", encoding="utf-8").write(build_card(theme))
+        print(f"{os.path.basename(p):24} {os.path.getsize(p) / 1024:8.1f} KB")
+        p = os.path.join(OUT_DIR, f"portfolio-{theme}.svg")
+        open(p, "w", encoding="utf-8").write(build_portfolio(theme))
         print(f"{os.path.basename(p):24} {os.path.getsize(p) / 1024:8.1f} KB")
         for key, label in LINKS:
             p = os.path.join(OUT_DIR, f"link-{key}-{theme}.svg")
